@@ -78,7 +78,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
-        run: npm ci
+        run: npm install
 
       - name: Frontend type check
         working-directory: crates/libretune-app
@@ -112,7 +112,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
-        run: npm ci
+        run: npm install
 
       - name: Stamp nightly version
         working-directory: crates/libretune-app/src-tauri
@@ -180,7 +180,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
-        run: npm ci
+        run: npm install
 
       - name: Build Tauri app (Windows - Portable)
         working-directory: crates/libretune-app
@@ -231,7 +231,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
-        run: npm ci
+        run: npm install
 
       - name: Stamp nightly version
         working-directory: crates/libretune-app/src-tauri
