@@ -10,19 +10,23 @@ jobs:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
+    defaults:
+      run:
+        working-directory: DCTuneR_final/crates/libretune-app
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
       - name: Install frontend dependencies
-        run: |
-          cd DCTuneR_final/crates/libretune-app
-          npm install
+        run: npm install
+
       - name: Build Tauri app
-        run: |
-          cd DCTuneR_final/crates/libretune-app
-          npx tauri build
+        run: npx tauri build
