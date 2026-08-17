@@ -52,20 +52,20 @@ jobs:
           node-version: '20'
 
       - name: Install frontend dependencies
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npm install
 
       - name: Build Tauri app (Linux)
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npx tauri build --target x86_64-unknown-linux-gnu
 
       - name: Prepare artifacts directory
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: |
           mkdir -p artifacts/linux
 
       - name: Copy Linux artifacts
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: |
           # Copy AppImage if it exists (check both possible locations)
           if [ -d "../../target/x86_64-unknown-linux-gnu/release/bundle/appimage" ]; then
@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: linux-x86_64
-          path: crates/libretune-app/artifacts/linux/*
+          path: DCTuneR_final/crates/libretune-app/artifacts/linux/*
           if-no-files-found: warn
           retention-days: 30
 
@@ -113,20 +113,20 @@ jobs:
           node-version: '20'
 
       - name: Install frontend dependencies
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npm install
 
       - name: Build Tauri app (Windows)
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npx tauri build --target x86_64-pc-windows-msvc
 
       - name: Prepare artifacts directory
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: |
           mkdir artifacts\windows
 
       - name: Copy Windows artifacts
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         shell: cmd
         run: |
           REM Copy NSIS installer if it exists (check workspace root first, then local)
@@ -151,7 +151,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: windows-x86_64
-          path: crates/libretune-app/artifacts/windows/*
+          path: DCTuneR_final/crates/libretune-app/artifacts/windows/*
           if-no-files-found: warn
           retention-days: 30
 
@@ -171,7 +171,7 @@ jobs:
           node-version: '20'
 
       - name: Install frontend dependencies
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npm install
 
       - name: Add Rust targets
@@ -180,20 +180,20 @@ jobs:
           rustup target add x86_64-apple-darwin
 
       - name: Build Tauri app (macOS ARM)
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npx tauri build --target aarch64-apple-darwin
 
       - name: Build Tauri app (macOS Intel)
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npx tauri build --target x86_64-apple-darwin
 
       - name: Prepare artifacts directory
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: |
           mkdir -p artifacts/macos
 
       - name: Copy and package macOS artifacts
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: |
           # Copy DMG files (check workspace root first, then local)
           for dmg in ../../target/*/release/bundle/dmg/*.dmg; do
@@ -211,7 +211,7 @@ jobs:
           for app_bundle in ../../target/*/release/bundle/macos/*.app; do
             if [ -d "$app_bundle" ]; then
               zip_name="artifacts/macos/$(basename "$app_bundle" .app).zip"
-              # Ensure artifacts directory exists (we're in crates/libretune-app)
+              # Ensure artifacts directory exists (we're in DCTuneR_final/crates/libretune-app)
               mkdir -p artifacts/macos
               echo "Zipping $app_bundle to $zip_name"
               # Use absolute path for zip output to avoid path issues after cd
@@ -225,7 +225,7 @@ jobs:
           for app_bundle in src-tauri/target/*/release/bundle/macos/*.app; do
             if [ -d "$app_bundle" ]; then
               zip_name="artifacts/macos/$(basename "$app_bundle" .app).zip"
-              # Ensure artifacts directory exists (we're in crates/libretune-app)
+              # Ensure artifacts directory exists (we're in DCTuneR_final/crates/libretune-app)
               mkdir -p artifacts/macos
               echo "Zipping $app_bundle to $zip_name"
               # Use absolute path for zip output to avoid path issues after cd
@@ -243,7 +243,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: macos-universal
-          path: crates/libretune-app/artifacts/macos/*
+          path: DCTuneR_final/crates/libretune-app/artifacts/macos/*
           if-no-files-found: warn
           retention-days: 30
 

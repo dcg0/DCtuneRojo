@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
     steps:
       - uses: actions/checkout@v5
 
@@ -154,11 +154,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npm install
 
       - name: Build Tauri AppImage
-        working-directory: crates/libretune-app
+        working-directory: DCTuneR_final/crates/libretune-app
         run: npm run tauri build -- --target x86_64-unknown-linux-gnu 2>&1 | grep -i appimage || true
 
       - name: Find and validate AppImage
