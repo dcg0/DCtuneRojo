@@ -75,8 +75,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: crates/libretune-app/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
@@ -111,8 +109,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: crates/libretune-app/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
@@ -181,8 +177,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: crates/libretune-app/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
@@ -234,8 +228,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: crates/libretune-app/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: crates/libretune-app
