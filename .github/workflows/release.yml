@@ -21,7 +21,7 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libpkgconf-dev libudev-dev libglib2.0-dev libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf appstream
+          sudo apt-get install -y libpkgconf-dev libudev-dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Tauri app (Windows)
         if: matrix.platform == 'windows-latest'
-        run: npx tauri build --ignore-version-mismatches --bundles nsis
+        run: npx tauri build --ignore-version-mismatches
 
       - name: Build Tauri app (Linux / macOS)
         if: matrix.platform != 'windows-latest'
@@ -47,4 +47,4 @@ jobs:
         with:
           name: app-build-${{ matrix.platform }}
           path: |
-            DCTuneR_final/crates/libretune-app/src-tauri/target/release/bundle/
+            src-tauri/target/release/bundle/
