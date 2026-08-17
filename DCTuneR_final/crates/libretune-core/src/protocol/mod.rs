@@ -1,0 +1,44 @@
+//! Serial Protocol Communication
+//!
+//! Implements the Megasquirt/Speeduino serial protocol for ECU communication.
+//!
+//! Supports both legacy ASCII protocol and modern binary protocol with CRC32.
+
+pub mod command_builder;
+pub mod commands;
+mod connection;
+pub mod discovery;
+mod error;
+mod packet;
+mod response_code;
+pub mod serial;
+pub mod stream;
+
+pub use discovery::{
+    discover_ecu, DiscoveredEcu, DiscoveryConfig, DiscoveryResult, OpenPort,
+    DEFAULT_SEARCH_BAUD_RATES, DEFAULT_SEARCH_QUERIES,
+};
+
+pub use command_builder::CommandBuilder;
+pub use commands::{Command, ConsoleCommand};
+pub use connection::{
+    Connection, ConnectionConfig, ConnectionState, ConnectionType, RuntimeFetch, RuntimePacketMode,
+};
+pub use error::ProtocolError;
+pub use packet::{Packet, PacketBuilder};
+pub use response_code::ResponseCode;
+pub use serial::{clear_buffers, configure_port, list_ports, open_port, PortInfo};
+pub use stream::CommunicationChannel;
+
+/// Default baud rate for ECU communication
+pub const DEFAULT_BAUD_RATE: u32 = 115200;
+
+/// Default timeout for responses in milliseconds
+/// Increased from 1000ms to 2000ms to accommodate USB/ECU latency observed during handshakes.
+pub const DEFAULT_TIMEOUT_MS: u64 = 2000;
+
+/// Maximum packet size
+/// Maximum packet payload size. The 2-byte length field in msEnvelope_1.0 can hold up to
+/// 65535 bytes, so we allow that as the upper bound. The previous 8192 limit was arbitrary
+/// and caused BufferOverflow errors on large pages (e.g. rusEFI pageSize = 25924).
+pub const MAX_PACKET_SIZE: usize = 65535;

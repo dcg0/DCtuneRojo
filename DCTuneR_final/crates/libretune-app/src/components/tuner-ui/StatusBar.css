@@ -1,0 +1,232 @@
+/*
+ * StatusBar - Bottom status bar with connection, logging, and custom indicators
+ */
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  background: var(--bg-statusbar);
+  border-top: 1px solid var(--border-subtle);
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.statusbar-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statusbar-section-left {
+  flex: 0 0 auto;
+}
+
+.statusbar-section-center {
+  flex: 1;
+  justify-content: center;
+}
+
+.statusbar-section-right {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.statusbar-connection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.statusbar-connection.connected {
+  color: var(--success);
+}
+
+.statusbar-connection.warning {
+  color: var(--warning, #f59e0b);
+}
+
+.statusbar-connection.pending {
+  color: var(--warning, #f59e0b);
+}
+
+.statusbar-connection.disconnected {
+  color: var(--text-muted);
+}
+
+.statusbar-connection-clickable {
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.statusbar-connection-clickable:hover {
+  background: var(--bg-hover);
+}
+
+.statusbar-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.statusbar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.statusbar-item-clickable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.statusbar-item-clickable:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Status channel indicators (realtime data display) */
+.statusbar-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.statusbar-channel-label {
+  color: var(--text-muted);
+}
+
+.statusbar-channel-value {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.statusbar-channel-unit {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.statusbar-channel-success .statusbar-channel-value { color: var(--success); }
+.statusbar-channel-warning .statusbar-channel-value { color: var(--warning); }
+.statusbar-channel-error .statusbar-channel-value { color: var(--error); }
+.statusbar-channel-info .statusbar-channel-value { color: var(--info); }
+
+/* TS-style grid cells for realtime data */
+.statusbar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 2px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 2px;
+}
+
+.statusbar-cell-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+.statusbar-cell-value {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.statusbar-cell-unit {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+/* Color variants for cells */
+.statusbar-cell-success .statusbar-cell-value { color: var(--success); }
+.statusbar-cell-warning .statusbar-cell-value { color: var(--warning); }
+.statusbar-cell-error .statusbar-cell-value { color: var(--error); }
+.statusbar-cell-info .statusbar-cell-value { color: var(--info); }
+
+/* Logging indicator */
+.logging-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logging-inactive {
+  color: var(--text-muted);
+}
+
+.logging-active {
+  color: var(--error);
+}
+
+.logging-duration {
+  font-family: var(--font-mono);
+  margin-left: var(--space-1);
+}
+
+/* Pagination controls for status bar channels */
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.pagination-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-emphasis);
+}
+
+.pagination-btn:active {
+  background: var(--bg-active);
+  transform: scale(0.95);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-indicator {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  min-width: 32px;
+  text-align: center;
+}
+

@@ -1,0 +1,168 @@
+.afr-delay-dialog {
+  background: var(--panel-bg, #1e1e2e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  padding: 20px;
+  width: 520px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: var(--text-color, #e0e0e0);
+}
+
+.afr-delay-dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.afr-delay-intro {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+/* The safety notice is the most important thing on the dialog, so it is
+   visually prominent rather than fine print. */
+.afr-delay-safety {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: rgba(255, 176, 0, 0.08);
+  border: 1px solid rgba(255, 176, 0, 0.35);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.afr-delay-safety svg { flex-shrink: 0; margin-top: 2px; color: #ffb000; }
+.afr-delay-safety ul { margin: 6px 0 0; padding-left: 18px; }
+.afr-delay-safety li { margin: 3px 0; }
+.afr-delay-safety code {
+  background: rgba(255,255,255,0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.afr-delay-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+}
+.afr-delay-fields label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 0.85rem;
+}
+.afr-delay-fields input {
+  grid-column: 1 / -1;
+  background: var(--input-bg, #14141f);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  color: inherit;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.afr-delay-fields input:disabled { opacity: 0.5; }
+.afr-delay-fields .unit { font-size: 0.78rem; opacity: 0.6; }
+
+.afr-delay-estimate {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0 0 14px;
+}
+
+.afr-delay-progress {
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+}
+.afr-delay-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.afr-delay-bar > div {
+  height: 100%;
+  background: #4fc3f7;
+  transition: width 0.25s ease;
+}
+.afr-delay-progress.phase-enriching .afr-delay-bar > div { background: #ffb000; }
+.afr-delay-progress.phase-complete .afr-delay-bar > div { background: #66bb6a; }
+.afr-delay-progress.phase-aborted .afr-delay-bar > div { background: #ef5350; }
+
+.afr-delay-status { display: flex; gap: 8px; align-items: baseline; }
+.afr-delay-status .phase {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+.afr-delay-values {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.afr-delay-result {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: rgba(102, 187, 106, 0.1);
+  border: 1px solid rgba(102, 187, 106, 0.35);
+  font-size: 0.83rem;
+}
+
+/* Errors here can mean the engine is still enriched, so they must be
+   impossible to miss and are never truncated. */
+.afr-delay-error {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: rgba(239, 83, 80, 0.12);
+  border: 1px solid rgba(239, 83, 80, 0.5);
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+.afr-delay-error svg { flex-shrink: 0; margin-top: 2px; color: #ef5350; }
+
+.afr-delay-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.afr-delay-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color, #333);
+  background: var(--button-bg, #2a2a3a);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.afr-delay-actions button.primary { background: #1976d2; border-color: #1976d2; }
+/* Abort is the only control during a run, so it gets the full width of
+   attention rather than sitting alongside disabled buttons. */
+.afr-delay-actions button.danger {
+  background: #c62828;
+  border-color: #c62828;
+  flex: 1;
+  justify-content: center;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}

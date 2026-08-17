@@ -1,0 +1,90 @@
+/* Shared FormField primitive */
+
+.lt-field {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.lt-field--stacked {
+  flex-direction: column;
+}
+
+.lt-field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.lt-field--inline .lt-field__label {
+  min-width: 140px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.lt-field__label {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lt-field__required {
+  color: var(--error);
+  font-weight: 700;
+}
+
+.lt-field__control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.lt-field__help {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.lt-field__error {
+  font-size: var(--font-size-sm);
+  color: var(--error);
+  line-height: 1.4;
+}
+
+/* Default styling for direct input/select/textarea descendants. Callers can override. */
+.lt-field__control > input[type='number'],
+.lt-field__control > input[type='text'],
+.lt-field__control > input[type='email'],
+.lt-field__control > input[type='password'],
+.lt-field__control > input[type='search'],
+.lt-field__control > input[type='url'],
+.lt-field__control > select,
+.lt-field__control > textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--motion-fast) ease;
+  box-sizing: border-box;
+}
+
+.lt-field__control > input:focus,
+.lt-field__control > select:focus,
+.lt-field__control > textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+/* When in error state, give the inner control a red ring */
+.lt-field--error .lt-field__control input,
+.lt-field--error .lt-field__control select,
+.lt-field--error .lt-field__control textarea {
+  border-color: var(--error);
+}

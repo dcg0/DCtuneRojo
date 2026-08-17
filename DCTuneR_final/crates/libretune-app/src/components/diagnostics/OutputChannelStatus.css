@@ -1,0 +1,216 @@
+/* Output Channel Status — diagnostics view */
+
+.och-status {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+  height: 100%;
+  overflow-y: auto;
+  color: var(--text-primary);
+}
+
+.och-status-loading,
+.och-status-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.och-status-error {
+  color: var(--error);
+}
+
+.och-error-icon {
+  font-size: 1.4rem;
+}
+
+/* Header */
+.och-status-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.och-status-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.och-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.och-status-badge[data-mode="burst"] {
+  background: rgba(0, 180, 255, 0.15);
+  color: #00b4ff;
+  border: 1px solid rgba(0, 180, 255, 0.3);
+}
+
+.och-status-badge[data-mode="och"] {
+  background: rgba(0, 220, 130, 0.15);
+  color: #00dc82;
+  border: 1px solid rgba(0, 220, 130, 0.3);
+}
+
+.och-status-badge[data-mode="demo"] {
+  background: rgba(255, 180, 0, 0.15);
+  color: #ffb400;
+  border: 1px solid rgba(255, 180, 0, 0.3);
+}
+
+/* Card grid */
+.och-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.och-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.och-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.och-card-wide {
+  grid-column: 1 / -1;
+}
+
+/* Stats table */
+.och-stats-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.och-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.och-stat-row:last-child {
+  border-bottom: none;
+}
+
+.och-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.och-stat-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.och-stat-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.och-mode {
+  color: var(--accent);
+}
+
+.och-reason {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* Live stats grid */
+.och-live-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.och-live-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.och-live-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.och-live-unit {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.och-highlight {
+  color: var(--accent);
+}
+
+.och-success {
+  color: #00dc82;
+}
+
+.och-warning {
+  color: #ffb400;
+}
+
+.och-error {
+  color: var(--error);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .och-status {
+    padding: 1rem;
+  }
+
+  .och-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .och-live-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .och-live-value {
+    font-size: 1.1rem;
+  }
+}

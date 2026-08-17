@@ -1,0 +1,106 @@
+.lambda-preview {
+  flex: 0 0 auto;
+  max-width: 48%;
+  overflow: auto;
+  border: 1px solid var(--border-color, rgba(128, 140, 160, 0.25));
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--bg-secondary, #1a2030);
+  /* Height is pinned to the main table grid via ResizeObserver */
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.lambda-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.lambda-preview-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #9aa4b8);
+}
+
+.lambda-preview-header select {
+  background: var(--bg-primary, #10141f);
+  color: var(--text-primary, #e6eaf2);
+  border: 1px solid var(--border-color, rgba(128, 140, 160, 0.25));
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.lambda-preview-grid {
+  display: grid;
+  gap: 1px;
+  font-family: monospace;
+  font-size: 13px;
+  /* Fill the pinned panel, distributing rows to match the main table */
+  flex: 1;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.lambda-preview-grid > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.lambda-preview-corner {
+  background: transparent;
+}
+
+.lambda-preview-axis {
+  padding: 3px 6px;
+  text-align: right;
+  color: var(--text-secondary, #9aa4b8);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lambda-preview-cell {
+  padding: 3px 6px;
+  text-align: right;
+  color: var(--text-primary, #e6eaf2);
+  background: var(--bg-primary, #10141f);
+  white-space: nowrap;
+}
+
+/* ---- Live gauges ---- */
+.lambda-preview-gauges {
+  display: flex;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.lambda-preview-gauge {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--border-color, rgba(128, 140, 160, 0.25));
+  border-radius: 5px;
+  background: var(--bg-primary, #10141f);
+}
+
+.lambda-preview-gauge-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #9aa4b8);
+}
+
+.lambda-preview-gauge-value {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-color, #4f8fe8);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,212 @@
+/* TableComparisonDialog — content/results styles. Outer chrome handled by Dialog. */
+
+.table-comparison-content {
+  min-width: 580px;
+}
+
+/* Table selection row */
+.table-selection {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-3);
+  align-items: end;
+  margin-bottom: var(--space-3);
+}
+
+.table-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-select-group label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-select-group select {
+  padding: 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.table-select-group select:focus {
+  outline: none;
+  border-color: var(--border-focus, var(--accent-primary));
+}
+
+.swap-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+
+.swap-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Error */
+.comparison-error {
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+  border-radius: var(--radius-sm);
+  color: var(--state-error);
+  font-size: var(--font-size-sm);
+}
+
+/* Results */
+.comparison-results {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.results-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-2);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.stat-value {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: 2px;
+  text-align: center;
+}
+
+.no-differences {
+  padding: var(--space-3);
+  text-align: center;
+  color: var(--state-success);
+  background: rgba(92, 184, 92, 0.1);
+  border: 1px solid rgba(92, 184, 92, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.diff-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.diff-group {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.diff-group h4 {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.diff-group.high h4 {
+  background: rgba(220, 53, 69, 0.15);
+  color: var(--state-error);
+}
+
+.diff-group.medium h4 {
+  background: rgba(240, 173, 78, 0.15);
+  color: var(--state-warning);
+}
+
+.diff-group.low h4 {
+  background: rgba(92, 184, 92, 0.1);
+  color: var(--state-success);
+}
+
+.diff-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.diff-list.collapsed {
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.diff-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
+  gap: var(--space-2);
+  padding: 6px var(--space-3);
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: center;
+}
+
+.diff-item:last-child {
+  border-bottom: none;
+}
+
+.diff-coord {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.diff-values {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.diff-percent {
+  font-family: var(--font-mono);
+  text-align: right;
+  font-weight: 600;
+}
+
+.diff-percent.positive {
+  color: var(--state-error);
+}
+
+.diff-percent.negative {
+  color: var(--accent-primary);
+}
+
+.diff-more {
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+}

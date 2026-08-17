@@ -1,0 +1,110 @@
+/* Pop-out Window Styles */
+
+.popout-window {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.popout-loading,
+.popout-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.popout-error {
+  color: var(--error);
+}
+
+.popout-error button {
+  padding: var(--space-2) var(--space-4);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+/* Header bar */
+.popout-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-default);
+  -webkit-app-region: drag;
+}
+
+.popout-header button {
+  -webkit-app-region: no-drag;
+}
+
+.popout-title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popout-dock-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--accent-text);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--motion-fast) ease;
+}
+
+.popout-dock-btn:hover {
+  background: var(--accent-hover);
+}
+
+.popout-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+
+.popout-close-btn:hover {
+  background: var(--error-bg, color-mix(in srgb, var(--error) 15%, transparent));
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* Content area */
+.popout-content {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+.popout-unsupported {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+}

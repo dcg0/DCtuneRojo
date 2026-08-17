@@ -1,0 +1,41 @@
+# Build artifacts
+/target/
+**/target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (for Tauri frontend)
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Test artifacts
+*.profraw
+
+# Accidental path copies (shell quoting mistakes)
+**/"/
+
+# Reference materials (not for distribution)
+/reference/
+
+# Release build outputs
+/releases/linux/
+/releases/macos/
+/releases/windows/
+/releases/BUILD_INFO.txt

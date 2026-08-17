@@ -1,0 +1,23 @@
+{
+  "cellEdit": {
+    "title": "Edit Cell Value",
+    "decreaseBy1": "Decrease by 1",
+    "decreaseByPoint1": "Decrease by 0.1",
+    "increaseBy1": "Increase by 1",
+    "increaseByPoint1": "Increase by 0.1",
+    "validNumber": "Please enter a valid number",
+    "valueAtLeast": "Value must be at least {{min}}",
+    "valueAtMost": "Value must be at most {{max}}"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageDescription": "Interface language. Restart not required."
+  },
+  "newProject": {
+    "title": "New Project",
+    "projectName": "Project Name",
+    "iniFile": "INI Definition File",
+    "create": "Create"
+  }
+}

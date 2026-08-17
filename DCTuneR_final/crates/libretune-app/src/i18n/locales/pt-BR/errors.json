@@ -1,0 +1,9 @@
+{
+  "generic": "Algo deu errado",
+  "loadFailed": "Falha ao carregar: {{detail}}",
+  "saveFailed": "Falha ao salvar: {{detail}}",
+  "connectFailed": "Falha ao conectar à ECU: {{detail}}",
+  "timeout": "Tempo da operação esgotado",
+  "notConnected": "A ECU não está conectada",
+  "noProject": "Nenhum projeto aberto"
+}

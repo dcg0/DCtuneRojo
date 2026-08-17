@@ -1,0 +1,62 @@
+/* Reusable "at your own risk" acknowledgement banner + checkbox. */
+
+.risk-ack {
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.risk-ack-high {
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  background: rgba(255, 80, 80, 0.08);
+}
+
+.risk-ack-medium {
+  border: 1px solid rgba(255, 170, 0, 0.35);
+  background: rgba(255, 170, 0, 0.08);
+}
+
+.risk-ack-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.risk-ack-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.risk-ack-high .risk-ack-label {
+  color: #f0a0a0;
+}
+
+.risk-ack-medium .risk-ack-label {
+  color: #f0c070;
+}
+
+.risk-ack-warning {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.risk-ack-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.risk-ack-checkbox input[type='checkbox'] {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.risk-ack-checkbox input[type='checkbox']:disabled {
+  cursor: not-allowed;
+}

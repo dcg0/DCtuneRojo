@@ -1,0 +1,23 @@
+{
+  "cellEdit": {
+    "title": "Editar Valor da Célula",
+    "decreaseBy1": "Diminuir 1",
+    "decreaseByPoint1": "Diminuir 0,1",
+    "increaseBy1": "Aumentar 1",
+    "increaseByPoint1": "Aumentar 0,1",
+    "validNumber": "Por favor, insira um número válido",
+    "valueAtLeast": "O valor deve ser no mínimo {{min}}",
+    "valueAtMost": "O valor deve ser no máximo {{max}}"
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma",
+    "languageDescription": "Idioma da interface. Não é necessário reiniciar."
+  },
+  "newProject": {
+    "title": "Novo Projeto",
+    "projectName": "Nome do Projeto",
+    "iniFile": "Arquivo de Definição INI",
+    "create": "Criar"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "file": {
+    "title": "&File",
+    "newProject": "&Új Projekt…\tCtrl+N",
+    "importProject": "&TS Projekt betöltése…",
+    "closeProject": "Projekt &bezárása",
+    "saveTune": "&Tune mentése\tCtrl+S",
+    "saveTuneAs": "Tune mentése &másként…",
+    "loadTune": "Tune &betöltése…",
+    "createRestorePoint": "&Visszaállítási pont létrehozása",
+    "restorePoints": "Visszaállítási &pontok…",
+    "tuneHistory": "Tune &történet…",
+    "burnToEcu": "&Írás az ECU-ba\tCtrl+B",
+    "exit": "&Kilépés",
+    "settings": "&Beállítások…"
+  },
+  "edit": {
+    "title": "&Szerkeszt",
+    "undo": "&Visszaállít\tCtrl+Z",
+    "redo": "&Újra végrehajt\tCtrl+Y",
+    "cut": "&Kivág\tCtrl+X",
+    "copy": "&Másol\tCtrl+C",
+    "paste": "&Beilleszt\tCtrl+V",
+    "resetToDefaults": "&Alapértelmezesek beállitása"
+  },
+  "view": {
+    "title": "&Nézet",
+    "dashboard": "&Müszerfal",
+    "toggleSidebar": "&Oldal menü mutat/rejt",
+    "theme": "&Témák"
+  },
+  "tools": {
+    "title": "&Eszközök",
+    "autotune": "&AutoTune",
+    "dataLogging": "&Élő adat",
+    "outputChannelStatus": "&Kimenetek állapota",
+    "toothLogger": "&Jeladó loggolás",
+    "compositeLogger": "&Összetett loggolás",
+    "ecuConsole": "&ECU parancs konzol",
+    "ecuLuaEditor": "ECU &Lua szerkesztő",
+    "updateFirmware": "ECU &firmware frissítése…",
+    "enterDfuMode": "&DFU mód belépés…",
+    "tableCompare": "Tábla &összehasonlítás",
+    "tuneFileDiff": "Tune file &külömbség…",
+    "dynoData": "&Dyno adatok…",
+    "mathChannels": "Számolt &adat csatornák…",
+    "generateBaseMap": "Generate &Base Map…",
+    "plugins": "&Pluginek…",
+    "aiAssistant": "&AI Asszisztens",
+    "ecuConnection": "ECU &kapcsolat…"
+  },
+  "help": {
+    "title": "&Segítség",
+    "userManual": "Felhasznlói kézikönyv",
+    "keyboardShortcuts": "Gyorsbillentyük",
+    "about": "LibreTune-ról"
+  }
+}

@@ -1,0 +1,806 @@
+/**
+ * Graph Log — stacked strip charts for viewing recorded channels.
+ *
+ * Renders the active graph-log tab as stacked panes sharing a time axis.
+ * Each pane plots one channel against the left axis and one against the
+ * right, each with its own fixed or auto scale.
+ *
+ * The graph only draws recorded data: the session log while recording or
+ * after Stop, or a loaded log in playback. Before the first recording it
+ * shows an empty grid with a hint.
+ */
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Plus, X, Settings2, ZoomIn, ZoomOut } from 'lucide-react';
+import { Dialog } from '../common';
+import {
+  useGraphLogStore,
+  selectActiveTab,
+  ChannelSlot,
+  GraphPane,
+  AxisSide,
+} from '../../stores/graphLogStore';
+import './GraphLog.css';
+
+export interface GraphSample {
+  /** Timestamp in milliseconds (epoch or log-relative — only deltas matter) */
+  t: number;
+  values: Record<string, number>;
+}
+
+export interface GraphLogProps {
+  /** Recorded session log or playback samples */
+  samples: GraphSample[];
+  /** Channels the user may assign to slots */
+  availableChannels: string[];
+  /** Cursor position 0..1 across the visible window (playback), or null */
+  cursorPosition?: number | null;
+}
+
+const AXIS_TICKS = 5;
+const PANE_MIN_HEIGHT = 70;
+/** Horizontal padding reserved for the left/right axis labels */
+const PAD_L = 52;
+const PAD_R = 52;
+/** Zoom step per Q/A keypress or zoom button click */
+const ZOOM_FACTOR = 0.75;
+
+function formatWindow(sec: number): string {
+  if (sec < 10) return `${sec.toFixed(1)} s`;
+  if (sec < 60) return `${Math.round(sec)} s`;
+  const m = Math.floor(sec / 60);
+  const s = Math.round(sec % 60);
+  return s > 0 ? `${m}m ${s}s` : `${m} min`;
+}
+
+function formatTick(v: number): string {
+  const abs = Math.abs(v);
+  if (abs >= 1000) return v.toFixed(0);
+  if (abs >= 10) return v.toFixed(1);
+  return v.toFixed(2);
+}
+
+function formatClock(ms: number): string {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+/** Resolve slot bounds: fixed when configured, otherwise min/max of visible data. */
+function slotBounds(slot: ChannelSlot, visible: GraphSample[]): { min: number; max: number } {
+  if (!slot.auto) return { min: slot.min, max: slot.max };
+  let min = Infinity;
+  let max = -Infinity;
+  if (slot.channel) {
+    for (const s of visible) {
+      const v = s.values[slot.channel];
+      if (v === undefined) continue;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+  }
+  if (!isFinite(min) || !isFinite(max)) return { min: 0, max: 100 };
+  if (min === max) {
+    const pad = Math.abs(min) * 0.1 || 1;
+    return { min: min - pad, max: max + pad };
+  }
+  const pad = (max - min) * 0.05;
+  return { min: min - pad, max: max + pad };
+}
+
+/** Last recorded value of a channel within the visible window */
+function lastValue(channel: string | null, visible: GraphSample[]): number | undefined {
+  if (!channel) return undefined;
+  for (let i = visible.length - 1; i >= 0; i--) {
+    const v = visible[i].values[channel];
+    if (v !== undefined) return v;
+  }
+  return undefined;
+}
+
+/** Binary search for the sample index nearest to time t */
+function nearestIndex(data: GraphSample[], t: number): number {
+  let lo = 0;
+  let hi = data.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (data[mid].t < t) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo > 0 && Math.abs(data[lo - 1].t - t) < Math.abs(data[lo].t - t)) return lo - 1;
+  return lo;
+}
+
+interface PaneCanvasProps {
+  pane: GraphPane;
+  visible: GraphSample[];
+  windowMs: number;
+  windowEnd: number;
+  width: number;
+  height: number;
+  cursorPosition?: number | null;
+  /** Hovered position 0..1 across the plot area, or null */
+  hoverFrac?: number | null;
+  /** Persistent data cursor sample (arrow-key navigable), or null */
+  cursorSample?: GraphSample | null;
+  onOpenConfig: () => void;
+}
+
+const PaneCanvas: React.FC<PaneCanvasProps> = ({
+  pane,
+  visible,
+  windowMs,
+  windowEnd,
+  width,
+  height,
+  cursorPosition,
+  hoverFrac = null,
+  cursorSample = null,
+  onOpenConfig,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const padL = PAD_L;
+    const padR = PAD_R;
+    const padT = 6;
+    const padB = 4;
+    const plotW = Math.max(10, width - padL - padR);
+    const plotH = Math.max(10, height - padT - padB);
+
+    const styles = getComputedStyle(canvas);
+    const bg = styles.getPropertyValue('--graphlog-pane-bg').trim() || '#141824';
+    const gridColor = styles.getPropertyValue('--graphlog-grid').trim() || 'rgba(128,140,160,0.15)';
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, width, height);
+
+    // Grid
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= AXIS_TICKS - 1; i++) {
+      const y = padT + (plotH * i) / (AXIS_TICKS - 1);
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + plotW, y);
+    }
+    const vLines = 6;
+    for (let i = 0; i <= vLines; i++) {
+      const x = padL + (plotW * i) / vLines;
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + plotH);
+    }
+    ctx.stroke();
+
+    const sides: AxisSide[] = ['left', 'right'];
+    for (const side of sides) {
+      const slot = pane[side];
+      const { min, max } = slotBounds(slot, visible);
+      const range = max - min || 1;
+
+      // Axis tick labels
+      ctx.fillStyle = slot.color;
+      ctx.font = '10px monospace';
+      ctx.textAlign = side === 'left' ? 'right' : 'left';
+      ctx.textBaseline = 'middle';
+      if (slot.channel) {
+        for (let i = 0; i < AXIS_TICKS; i++) {
+          const frac = i / (AXIS_TICKS - 1);
+          const y = padT + plotH * (1 - frac);
+          const v = min + range * frac;
+          const x = side === 'left' ? padL - 6 : padL + plotW + 6;
+          ctx.fillText(formatTick(v), x, y);
+        }
+      }
+
+      // Trace, drawn as raw sample-and-hold steps — this is measurement data,
+      // not a smoothed presentation graph. When there are more samples than
+      // pixels, collapse each pixel column to its min/max span (oscilloscope
+      // style) so dense logs stay fast and peaks stay visible.
+      if (slot.channel && visible.length >= 2) {
+        ctx.strokeStyle = slot.color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (visible.length > plotW * 2) {
+          const colMin = new Float64Array(Math.ceil(plotW)).fill(Infinity);
+          const colMax = new Float64Array(Math.ceil(plotW)).fill(-Infinity);
+          for (const s of visible) {
+            const v = s.values[slot.channel];
+            if (v === undefined) continue;
+            const col = Math.min(
+              Math.ceil(plotW) - 1,
+              Math.max(0, Math.floor(plotW * (1 - (windowEnd - s.t) / windowMs))),
+            );
+            if (v < colMin[col]) colMin[col] = v;
+            if (v > colMax[col]) colMax[col] = v;
+          }
+          let prevYMid: number | null = null;
+          for (let col = 0; col < colMin.length; col++) {
+            if (colMin[col] === Infinity) {
+              prevYMid = null;
+              continue;
+            }
+            const x = padL + col;
+            const yLo = padT + plotH * (1 - (colMin[col] - min) / range);
+            const yHi = padT + plotH * (1 - (colMax[col] - min) / range);
+            // connect columns so sparse spikes don't float detached
+            if (prevYMid !== null) {
+              ctx.moveTo(x - 1, prevYMid);
+              ctx.lineTo(x, yHi);
+            }
+            ctx.moveTo(x, yHi);
+            ctx.lineTo(x, yLo + 0.5);
+            prevYMid = (yLo + yHi) / 2;
+          }
+        } else {
+          let started = false;
+          let prevY = 0;
+          for (const s of visible) {
+            const v = s.values[slot.channel];
+            if (v === undefined) {
+              started = false;
+              continue;
+            }
+            const x = padL + plotW * (1 - (windowEnd - s.t) / windowMs);
+            const y = padT + plotH * (1 - (v - min) / range);
+            if (!started) {
+              ctx.moveTo(x, y);
+              started = true;
+            } else {
+              ctx.lineTo(x, prevY);
+              ctx.lineTo(x, y);
+            }
+            prevY = y;
+          }
+        }
+        ctx.stroke();
+      }
+
+      // Peak marker: flag the highest value in the visible window so a pull's
+      // peak (e.g. 7500 rpm) is readable without hovering
+      if (slot.channel && visible.length >= 2) {
+        let peak: GraphSample | null = null;
+        let peakV = -Infinity;
+        for (const s of visible) {
+          const v = s.values[slot.channel];
+          if (v !== undefined && v > peakV) {
+            peakV = v;
+            peak = s;
+          }
+        }
+        if (peak && isFinite(peakV) && range > 0) {
+          const x = padL + plotW * (1 - (windowEnd - peak.t) / windowMs);
+          const y = padT + plotH * (1 - (peakV - min) / range);
+          ctx.fillStyle = slot.color;
+          ctx.globalAlpha = 0.75;
+          ctx.beginPath();
+          ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          const text = formatTick(peakV);
+          ctx.font = '11px monospace';
+          const tw = ctx.measureText(text).width;
+          const tx = Math.min(Math.max(x - tw / 2, padL + 2), padL + plotW - tw - 2);
+          const ty = y > padT + 16 ? y - 15 : y + 6;
+          ctx.fillStyle = bg;
+          ctx.fillRect(tx - 2, ty - 1, tw + 4, 13);
+          ctx.fillStyle = slot.color;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(text, tx, ty);
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // Channel label + latest value in the window
+      if (slot.channel) {
+        const current = lastValue(slot.channel, visible);
+        const label = `${slot.channel}${current !== undefined ? `: ${formatTick(current)}` : ''}`;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textBaseline = 'top';
+        ctx.textAlign = side === 'left' ? 'left' : 'right';
+        const x = side === 'left' ? padL + 6 : padL + plotW - 6;
+        ctx.fillText(label, x, padT + 4);
+      }
+    }
+
+    // Playback cursor
+    if (cursorPosition !== null && cursorPosition !== undefined) {
+      const x = padL + plotW * cursorPosition;
+      ctx.strokeStyle = 'rgba(255,80,80,0.9)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + plotH);
+      ctx.stroke();
+    }
+
+    // Vertical marker at a sample with dots and value labels for both slots.
+    const drawSampleMarker = (sample: GraphSample, lineStyle: string, lineW: number) => {
+      const x = padL + plotW * (1 - (windowEnd - sample.t) / windowMs);
+      if (x < padL - 1 || x > padL + plotW + 1) return;
+
+      ctx.strokeStyle = lineStyle;
+      ctx.lineWidth = lineW;
+      ctx.beginPath();
+      ctx.moveTo(x, padT);
+      ctx.lineTo(x, padT + plotH);
+      ctx.stroke();
+
+      for (const side of sides) {
+        const slot = pane[side];
+        if (!slot.channel) continue;
+        const v = sample.values[slot.channel];
+        if (v === undefined) continue;
+        const { min, max } = slotBounds(slot, visible);
+        const range = max - min || 1;
+        const y = padT + plotH * (1 - (v - min) / range);
+
+        // Marker dot on the line
+        ctx.fillStyle = slot.color;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Value label beside the cursor, flipped near the right edge
+        const text = formatTick(v);
+        ctx.font = 'bold 13px monospace';
+        const tw = ctx.measureText(text).width;
+        const onLeft = x > padL + plotW - tw - 14;
+        const tx = onLeft ? x - 6 - tw : x + 6;
+        const ty = Math.min(Math.max(y - 8, padT + 2), padT + plotH - 16);
+        ctx.fillStyle = bg;
+        ctx.fillRect(tx - 2, ty - 1, tw + 4, 16);
+        ctx.fillStyle = slot.color;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(text, tx, ty);
+      }
+    };
+
+    // Persistent data cursor (arrow-key navigable)
+    if (cursorSample) {
+      drawSampleMarker(cursorSample, 'rgba(79,143,232,0.95)', 1.5);
+    }
+
+    // Hover cursor: vertical bar snapped to the nearest sample
+    if (hoverFrac !== null && visible.length > 0) {
+      const tHover = windowEnd - windowMs * (1 - hoverFrac);
+      const nearest = visible[nearestIndex(visible, tHover)];
+      drawSampleMarker(nearest, 'rgba(220,225,235,0.6)', 1);
+    }
+  }, [pane, visible, windowMs, windowEnd, width, height, cursorPosition, hoverFrac, cursorSample]);
+
+  return (
+    <div className="graphlog-pane" style={{ height }}>
+      <canvas ref={canvasRef} style={{ width, height }} />
+      <button
+        type="button"
+        className="graphlog-pane-config"
+        title="Configure pane channels and scales"
+        onClick={onOpenConfig}
+      >
+        <Settings2 size={13} />
+      </button>
+    </div>
+  );
+};
+
+interface SlotConfigProps {
+  label: string;
+  slot: ChannelSlot;
+  availableChannels: string[];
+  onChange: (patch: Partial<ChannelSlot>) => void;
+}
+
+/** Name-pattern channel groups so the picker isn't one 1000-entry list.
+ *  First matching group wins; unmatched channels land in Other. */
+const CHANNEL_GROUPS: Array<[string, RegExp]> = [
+  ['Common', /^(rpm|map|tps|lambda|afr|coolant|iat|advance|pulseWidth|ve|boost|baro|battery|vBatt|afrTarget|targetLambda|vehicleSpeed|dwell|fuelLoad|ignitionLoad)$/i],
+  ['Fueling', /fuel|inj|pulse|lambda|afr|^ve|enrich|wall|charge|stoich|flex/i],
+  ['Ignition', /ign|spark|dwell|advance|timing|knock|coil/i],
+  ['Boost / VVT', /boost|wastegate|ewg|vvt|turbo/i],
+  ['Launch / ALS', /als|launch|antilag|shift|traction|torque/i],
+  ['Wideband', /^wb\d|wideband|ego/i],
+  ['Sensors', /temp|sens|clt|iat|baro|press|volt|batt|egt|oil|level|speed|gear/i],
+];
+
+function groupChannels(channels: string[]): Array<{ label: string; channels: string[] }> {
+  const buckets = new Map<string, string[]>(CHANNEL_GROUPS.map(([l]) => [l, []]));
+  buckets.set('Other', []);
+  for (const c of channels) {
+    const group = CHANNEL_GROUPS.find(([, re]) => re.test(c))?.[0] ?? 'Other';
+    buckets.get(group)!.push(c);
+  }
+  const sort = (a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase());
+  return [...buckets.entries()]
+    .filter(([, list]) => list.length > 0)
+    .map(([label, list]) => ({ label, channels: list.sort(sort) }));
+}
+
+const SlotConfig: React.FC<SlotConfigProps> = ({ label, slot, availableChannels, onChange }) => {
+  const groups = useMemo(() => groupChannels(availableChannels), [availableChannels]);
+  return (
+  <fieldset className="graphlog-slot-config">
+    <legend style={{ color: slot.color }}>{label}</legend>
+    <label>
+      Channel
+      <select
+        value={slot.channel ?? ''}
+        onChange={(e) => onChange({ channel: e.target.value || null })}
+      >
+        <option value="">— none —</option>
+        {groups.map((g) => (
+          <optgroup key={g.label} label={g.label}>
+            {g.channels.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+    <label className="graphlog-slot-auto">
+      <input
+        type="checkbox"
+        checked={slot.auto}
+        onChange={(e) => onChange({ auto: e.target.checked })}
+      />
+      Auto scale
+    </label>
+    <div className="graphlog-slot-range">
+      <label>
+        Min
+        <input
+          type="number"
+          step="any"
+          value={slot.min}
+          disabled={slot.auto}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) onChange({ min: v });
+          }}
+        />
+      </label>
+      <label>
+        Max
+        <input
+          type="number"
+          step="any"
+          value={slot.max}
+          disabled={slot.auto}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v)) onChange({ max: v });
+          }}
+        />
+      </label>
+    </div>
+  </fieldset>
+  );
+};
+
+export const GraphLog: React.FC<GraphLogProps> = ({
+  samples,
+  availableChannels,
+  cursorPosition = null,
+}) => {
+  const tabs = useGraphLogStore((s) => s.tabs);
+  const activeTab = useGraphLogStore(selectActiveTab);
+  const timeWindowSec = useGraphLogStore((s) => s.timeWindowSec);
+  const { addTab, removeTab, renameTab, setActiveTab, setTimeWindow, updateSlot } =
+    useGraphLogStore();
+
+  const [renamingTabId, setRenamingTabId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [configPane, setConfigPane] = useState<number | null>(null);
+  const [size, setSize] = useState({ width: 800, height: 480 });
+  const [hoverFrac, setHoverFrac] = useState<number | null>(null);
+  /** Right edge of the view in log time; null = follow the latest sample */
+  const [viewEnd, setViewEnd] = useState<number | null>(null);
+  /** Persistent data cursor position in log time; arrow keys step it */
+  const [cursorT, setCursorT] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Refs so the zoom handlers (bound once for hotkeys) see current values
+  const hoverFracRef = useRef<number | null>(null);
+  const viewEndRef = useRef<number | null>(null);
+  const cursorTRef = useRef<number | null>(null);
+  const samplesRef = useRef<GraphSample[]>(samples);
+  hoverFracRef.current = hoverFrac;
+  viewEndRef.current = viewEnd;
+  cursorTRef.current = cursorT;
+  samplesRef.current = samples;
+
+  /** Zoom keeping the time under the hover cursor fixed; anchors the right
+   *  edge when the mouse isn't over the graphs. */
+  const zoomBy = useCallback(
+    (factor: number) => {
+      const oldWin = useGraphLogStore.getState().timeWindowSec * 1000;
+      const newWin = Math.min(600, Math.max(2, (oldWin / 1000) * factor)) * 1000;
+      const data = samplesRef.current;
+      const frac = hoverFracRef.current;
+      if (data.length > 0 && frac !== null) {
+        const lastT = data[data.length - 1].t;
+        const curEnd = viewEndRef.current ?? lastT;
+        const tCursor = curEnd - oldWin * (1 - frac);
+        const newEnd = tCursor + (1 - frac) * newWin;
+        setViewEnd(newEnd >= lastT ? null : Math.max(newEnd, data[0].t));
+      }
+      setTimeWindow(newWin / 1000);
+    },
+    [setTimeWindow],
+  );
+
+  const zoomIn = useCallback(() => zoomBy(ZOOM_FACTOR), [zoomBy]);
+  const zoomOut = useCallback(() => zoomBy(1 / ZOOM_FACTOR), [zoomBy]);
+
+  /** Step the data cursor by n samples, panning the view to keep it visible */
+  const stepCursor = useCallback((delta: number) => {
+    const data = samplesRef.current;
+    if (data.length === 0) return;
+    const cur = cursorTRef.current;
+    let idx = cur === null ? data.length - 1 : nearestIndex(data, cur);
+    if (cur !== null) idx += delta;
+    idx = Math.min(data.length - 1, Math.max(0, idx));
+    const t = data[idx].t;
+    setCursorT(t);
+
+    // Keep the cursor inside the view: nudge the window edge past it
+    const winMs = useGraphLogStore.getState().timeWindowSec * 1000;
+    const lastT = data[data.length - 1].t;
+    const end = viewEndRef.current ?? lastT;
+    if (t > end) {
+      setViewEnd(t >= lastT ? null : t);
+    } else if (t < end - winMs) {
+      setViewEnd(Math.min(t + winMs, lastT));
+    }
+  }, []);
+
+  // Q = zoom in, A = zoom out, arrows = step data cursor, Esc = clear cursor
+  // (all ignored while typing in a form field)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      if (e.key === 'q' || e.key === 'Q') {
+        zoomIn();
+      } else if (e.key === 'a' || e.key === 'A') {
+        zoomOut();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const step = (e.shiftKey ? 10 : 1) * (e.key === 'ArrowLeft' ? -1 : 1);
+        stepCursor(step);
+      } else if (e.key === 'Escape') {
+        setCursorT(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [zoomIn, zoomOut, stepCursor]);
+
+  /** Click on the graphs places the data cursor at the nearest sample */
+  const handlePanesClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const data = samplesRef.current;
+    if (data.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const frac = (e.clientX - rect.left - PAD_L) / Math.max(1, rect.width - PAD_L - PAD_R);
+    if (frac < 0 || frac > 1) return;
+    const winMs = useGraphLogStore.getState().timeWindowSec * 1000;
+    const lastT = data[data.length - 1].t;
+    const end = viewEndRef.current ?? lastT;
+    const t = end - winMs * (1 - frac);
+    setCursorT(data[nearestIndex(data, t)].t);
+  }, []);
+
+  const handlePanesMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const frac = (e.clientX - rect.left - PAD_L) / Math.max(1, rect.width - PAD_L - PAD_R);
+    setHoverFrac(frac >= 0 && frac <= 1 ? frac : null);
+  }, []);
+
+  // Track container size
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setSize({ width: Math.max(300, rect.width), height: Math.max(200, rect.height) });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const windowMs = timeWindowSec * 1000;
+  const latestT = samples.length > 0 ? samples[samples.length - 1].t : 0;
+  const windowEnd = viewEnd !== null ? Math.min(viewEnd, latestT) : latestT;
+  const windowStart = windowEnd - windowMs;
+  const isFollowing = viewEnd === null;
+  const visible = useMemo(() => {
+    const startIdx = samples.findIndex((s) => s.t >= windowStart);
+    if (startIdx < 0) return [];
+    let endIdx = samples.length;
+    while (endIdx > startIdx && samples[endIdx - 1].t > windowEnd) endIdx--;
+    return samples.slice(startIdx, endIdx);
+  }, [samples, windowStart, windowEnd]);
+
+  const cursorSample = useMemo(
+    () => (cursorT !== null && samples.length > 0 ? samples[nearestIndex(samples, cursorT)] : null),
+    [cursorT, samples],
+  );
+
+  const visiblePanes = activeTab.panes.filter((p) => !p.hidden);
+  const timeAxisHeight = 22;
+  const paneHeight = Math.max(
+    PANE_MIN_HEIGHT,
+    Math.floor((size.height - timeAxisHeight) / Math.max(1, visiblePanes.length)),
+  );
+
+  const commitRename = () => {
+    if (renamingTabId) renameTab(renamingTabId, renameValue);
+    setRenamingTabId(null);
+  };
+
+  // Time axis labels (relative to the start of the log)
+  const timeLabels = useMemo(() => {
+    const labels: Array<{ frac: number; text: string }> = [];
+    const steps = 6;
+    const base = samples.length > 0 ? samples[0].t : windowStart;
+    for (let i = 0; i <= steps; i++) {
+      const frac = i / steps;
+      const t = windowStart + windowMs * frac;
+      labels.push({ frac, text: formatClock(t - base) });
+    }
+    return labels;
+  }, [windowStart, windowMs, samples]);
+
+  return (
+    <div className="graphlog" ref={containerRef}>
+      <div className="graphlog-tabbar">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            className={`graphlog-tab${tab.id === activeTab.id ? ' active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+            onDoubleClick={() => {
+              setRenamingTabId(tab.id);
+              setRenameValue(tab.name);
+            }}
+          >
+            {renamingTabId === tab.id ? (
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onBlur={commitRename}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitRename();
+                  if (e.key === 'Escape') setRenamingTabId(null);
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span>{tab.name}</span>
+            )}
+            {tabs.length > 1 && (
+              <button
+                type="button"
+                className="graphlog-tab-close"
+                title="Remove tab"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeTab(tab.id);
+                }}
+              >
+                <X size={11} />
+              </button>
+            )}
+          </div>
+        ))}
+        <button type="button" className="graphlog-tab-add" title="Add tab" onClick={addTab}>
+          <Plus size={13} />
+        </button>
+        <div className="graphlog-window-select">
+          {cursorSample && samples.length > 0 && (
+            <span className="graphlog-cursor-time" title="Data cursor (←/→ to step, Esc to clear)">
+              ▸ {formatClock(cursorSample.t - samples[0].t)}
+            </span>
+          )}
+          {!isFollowing && (
+            <button
+              type="button"
+              className="graphlog-latest-btn"
+              onClick={() => setViewEnd(null)}
+              title="Jump back to the newest data"
+            >
+              Latest
+            </button>
+          )}
+          <button type="button" onClick={zoomIn} title="Zoom in (Q)">
+            <ZoomIn size={14} />
+          </button>
+          <span className="graphlog-window-label">{formatWindow(timeWindowSec)}</span>
+          <button type="button" onClick={zoomOut} title="Zoom out (A)">
+            <ZoomOut size={14} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="graphlog-panes"
+        onMouseMove={handlePanesMouseMove}
+        onMouseLeave={() => setHoverFrac(null)}
+        onClick={handlePanesClick}
+      >
+        {samples.length === 0 && (
+          <div className="graphlog-empty-hint">Press Record to start logging</div>
+        )}
+        {visiblePanes.map((pane) => {
+          const paneIndex = activeTab.panes.indexOf(pane);
+          return (
+            <PaneCanvas
+              key={paneIndex}
+              pane={pane}
+              visible={visible}
+              windowMs={windowMs}
+              windowEnd={windowEnd}
+              width={size.width}
+              height={paneHeight}
+              cursorPosition={cursorPosition}
+              hoverFrac={hoverFrac}
+              cursorSample={cursorSample}
+              onOpenConfig={() => setConfigPane(paneIndex)}
+            />
+          );
+        })}
+        <div className="graphlog-timeaxis" style={{ height: timeAxisHeight }}>
+          {timeLabels.map((l) => (
+            <span key={l.frac} style={{ left: `calc(52px + (100% - 104px) * ${l.frac})` }}>
+              {l.text}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <Dialog
+        open={configPane !== null}
+        onClose={() => setConfigPane(null)}
+        title={`Graph ${configPane !== null ? configPane + 1 : ''} — channels & scales`}
+        size="sm"
+        className="graphlog-config-dialog"
+      >
+        <Dialog.Body>
+          {configPane !== null && (
+            <>
+              <SlotConfig
+                label="Left axis"
+                slot={activeTab.panes[configPane].left}
+                availableChannels={availableChannels}
+                onChange={(patch) => updateSlot(activeTab.id, configPane, 'left', patch)}
+              />
+              <SlotConfig
+                label="Right axis"
+                slot={activeTab.panes[configPane].right}
+                availableChannels={availableChannels}
+                onChange={(patch) => updateSlot(activeTab.id, configPane, 'right', patch)}
+              />
+            </>
+          )}
+        </Dialog.Body>
+      </Dialog>
+    </div>
+  );
+};
+
+export default GraphLog;

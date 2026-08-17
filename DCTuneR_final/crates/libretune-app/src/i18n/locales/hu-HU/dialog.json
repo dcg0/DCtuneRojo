@@ -1,0 +1,23 @@
+{
+  "cellEdit": {
+    "title": "Cella szerkesztése",
+    "decreaseBy1": "Csökkentés 1-el",
+    "decreaseByPoint1": "Csökkentés 0.1-el",
+    "increaseBy1": "Növelés 1-el",
+    "increaseByPoint1": "Növelés 0.1-el",
+    "validNumber": "Csak szám érvényes !",
+    "valueAtLeast": "A minimális érték: {{min}}",
+    "valueAtMost": "A maximális érték: {{max}}"
+  },
+  "settings": {
+    "title": "Beéllítások",
+    "language": "Nyelv",
+    "languageDescription": "A felület nyelve, Nem kell újraindítani."
+  },
+  "newProject": {
+    "title": "Új Projekt",
+    "projectName": "Projekt név",
+    "iniFile": "INI leíró file",
+    "create": "Létrehoz"
+  }
+}

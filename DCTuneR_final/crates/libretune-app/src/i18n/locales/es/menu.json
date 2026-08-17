@@ -1,0 +1,58 @@
+{
+  "file": {
+    "title": "&Archivo",
+    "newProject": "&Nuevo proyecto…\tCtrl+N",
+    "importProject": "&Importar proyecto TS…",
+    "closeProject": "&Cerrar proyecto",
+    "saveTune": "&Guardar tune\tCtrl+S",
+    "saveTuneAs": "Guardar tune &como…",
+    "loadTune": "&Cargar tune…",
+    "createRestorePoint": "Crear punto de &restauración",
+    "restorePoints": "&Puntos de restauración…",
+    "tuneHistory": "&Historial del tune…",
+    "burnToEcu": "&Grabar en ECU\tCtrl+B",
+    "exit": "&Salir",
+    "settings": "&Configuración…"
+  },
+  "edit": {
+    "title": "&Editar",
+    "undo": "&Deshacer\tCtrl+Z",
+    "redo": "&Rehacer\tCtrl+Y",
+    "cut": "Cor&tar\tCtrl+X",
+    "copy": "&Copiar\tCtrl+C",
+    "paste": "&Pegar\tCtrl+V",
+    "resetToDefaults": "Restaurar &valores por defecto"
+  },
+  "view": {
+    "title": "&Ver",
+    "dashboard": "&Panel",
+    "toggleSidebar": "Mostrar/ocultar &barra lateral",
+    "theme": "&Tema"
+  },
+  "tools": {
+    "title": "&Herramientas",
+    "autotune": "&AutoTune",
+    "dataLogging": "&Registro de datos",
+    "outputChannelStatus": "Estado de canales de &salida",
+    "toothLogger": "Registrador de &dientes",
+    "compositeLogger": "Registrador &compuesto",
+    "ecuConsole": "Consola de la &ECU",
+    "ecuLuaEditor": "Editor &Lua de la ECU",
+    "updateFirmware": "Actualizar &firmware de la ECU…",
+    "enterDfuMode": "Entrar en modo &DFU…",
+    "tableCompare": "Comparar &tablas",
+    "tuneFileDiff": "Diferencias de archivo de &tune…",
+    "dynoData": "Datos de &banco…",
+    "mathChannels": "Canales &matemáticos…",
+    "generateBaseMap": "Generar mapa &base…",
+    "plugins": "&Plugins…",
+    "aiAssistant": "Asistente de &IA",
+    "ecuConnection": "Conexión con la &ECU…"
+  },
+  "help": {
+    "title": "A&yuda",
+    "userManual": "&Manual de usuario",
+    "keyboardShortcuts": "&Atajos de teclado",
+    "about": "&Acerca de DC Tune Studio"
+  }
+}

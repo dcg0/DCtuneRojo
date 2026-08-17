@@ -1,0 +1,27 @@
+.help-viewer-content {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.help-text {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.help-text a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.help-text a:hover {
+  text-decoration: underline;
+}
+
+.help-no-content {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--space-4) 0;
+}

@@ -1,0 +1,471 @@
+/* Base container - minimal styles that don't conflict */
+.table-grid-container {
+  position: relative;
+  user-select: none;
+}
+
+/* Flat grid layout - headers and cells all in one grid for guaranteed alignment */
+.table-editor-2d .table-grid-container {
+  display: grid;
+  gap: 0;
+  overflow: auto;
+  width: fit-content;
+  height: fit-content;
+  flex: none;
+  padding: 0;
+  align-content: start;
+  border: 1px solid var(--table-grid-line);
+  box-sizing: border-box;
+  /* grid-template-columns set via inline style; row height via grid-auto-rows */
+  --table-row-h: 2rem;
+  grid-auto-rows: var(--table-row-h);
+}
+
+.table-editor-2d .table-grid-container--compact {
+  --table-row-h: 2rem;
+}
+
+/* Corner cell where axes meet */
+.table-editor-2d .axis-corner {
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  border-right: 1px solid var(--table-grid-line);
+  border-bottom: 1px solid var(--table-grid-line);
+}
+
+.table-editor-2d .table-cell {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  border-right: 1px solid var(--table-grid-line);
+  border-bottom: 1px solid var(--table-grid-line);
+  transition: background-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.table-editor-2d .table-cell.selected {
+  box-shadow: 0 0 0 3px var(--primary);
+  z-index: 10;
+}
+
+.table-editor-2d .table-cell.selected .cell-value {
+  font-weight: bold;
+}
+
+.table-editor-2d .table-cell.locked {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--surface-dim),
+    var(--surface-dim) 2px,
+    var(--border) 2px
+  );
+  opacity: 0.7;
+}
+
+.table-editor-2d .lock-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.table-editor-2d .lock-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--text-muted);
+  border-radius: 2px;
+}
+
+.table-editor-2d .cell-value {
+  pointer-events: none;
+}
+
+.table-editor-2d .cell-input {
+  width: 90%;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* Y-axis labels - sticky left for horizontal scrolling */
+.table-editor-2d .axis-bin-label.y-bin {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+}
+
+/* X-axis labels - sticky top for vertical scrolling */
+.table-editor-2d .axis-bin-label.x-bin {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.table-editor-2d .axis-bin-label {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-align: center;
+  border: none;
+  border-right: 1px solid var(--table-grid-line);
+  border-bottom: 1px solid var(--table-grid-line);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.1s ease;
+  box-sizing: border-box;
+}
+
+/* Dense tables: keep the header hit-target, hide overlapping text */
+.table-editor-2d .axis-bin-label--tick {
+  color: transparent;
+}
+
+.table-editor-2d .axis-bin-label:hover {
+  background: var(--surface-bright);
+}
+
+.table-editor-2d .axis-bin-label.selected {
+  background: var(--primary);
+  color: white;
+  font-weight: bold;
+}
+
+/* Use specific input styling when in editing mode */
+input.table-editor-2d .axis-bin-label,
+.table-editor-2d .axis-bin-label.editing {
+  display: inline-block;
+  cursor: text;
+  background: var(--surface-bright);
+  color: var(--text-primary);
+}
+
+.table-editor-2d .axis-bin-label:disabled {
+  background: var(--surface-dim);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.table-editor-2d .history-trail-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 2px 8px rgba(74, 144, 226, 0.2));
+}
+
+.table-editor-2d .history-trail-point {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(74, 144, 226, 0.6));
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.8), inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  animation: trailFade 5s ease-out forwards;
+}
+
+@keyframes trailFade {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: brightness(1.2) drop-shadow(0 0 4px rgba(74, 144, 226, 1));
+  }
+  25% {
+    filter: brightness(1) drop-shadow(0 0 6px rgba(74, 144, 226, 0.8));
+  }
+  75% {
+    opacity: 0.3;
+    filter: brightness(0.9) drop-shadow(0 0 2px rgba(74, 144, 226, 0.4));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+    filter: brightness(0.7) drop-shadow(0 0 0px rgba(74, 144, 226, 0));
+  }
+}
+
+/* Table toolbar - scoped under .table-editor-2d */
+.table-editor-2d .table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.table-editor-2d .toolbar-section {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.table-editor-2d .toolbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 2.5rem;
+}
+
+.table-editor-2d .toolbar-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--surface);
+  border-color: var(--primary);
+}
+
+.table-editor-2d .toolbar-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.table-editor-2d .toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.table-editor-2d .hotkey-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.table-editor-2d .table-context-menu {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.table-editor-2d .context-menu-header {
+  padding: 0.75rem;
+  background: var(--surface-dim);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-editor-2d .context-menu-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.table-editor-2d .context-menu-item:hover {
+  background: var(--surface-dim);
+}
+
+.table-editor-2d .context-menu-item.danger:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.table-editor-2d .context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 0.25rem 0;
+}
+
+.table-editor-2d .context-shortcut {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--surface-dim);
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.table-editor-2d .scale-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.table-editor-2d .scale-input-container input {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-dim);
+}
+
+.table-editor-2d .scale-apply-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background: var(--primary);
+  color: var(--surface);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.table-editor-2d .scale-apply-btn:hover {
+  background: var(--primary-light);
+}
+
+/* Enhanced Context Menu Styles */
+.table-editor-2d .context-menu-title {
+  font-weight: 600;
+  font-size: 0.9em;
+  color: var(--text-primary);
+}
+
+.table-editor-2d .context-menu-subtitle {
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.table-editor-2d .input-section {
+  padding: 0.5rem;
+  background: var(--surface-dim);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.table-editor-2d .input-mode-tabs {
+  display: flex;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.table-editor-2d .tab-btn {
+  flex: 1;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.table-editor-2d .tab-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.table-editor-2d .input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-editor-2d .operator {
+  font-weight: bold;
+  color: var(--text-muted);
+  width: 12px;
+  text-align: center;
+}
+
+.table-editor-2d .input-row input {
+  flex: 1;
+  width: 60px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.table-editor-2d .apply-btn {
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8em;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.table-editor-2d .apply-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.table-editor-2d .context-menu-item .icon {
+  margin-right: 8px;
+  min-width: 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1.1em;
+}
+
+.table-editor-2d .context-menu-item:hover .icon {
+  color: var(--text-primary);
+}

@@ -1,0 +1,140 @@
+/* OpenTuneDialog — content styles. Outer chrome handled by Dialog. */
+
+.open-tune-content {
+  min-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.open-tune-content .dialog-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.file-picker {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.file-input,
+.name-input,
+.ini-select {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.file-input:focus,
+.name-input:focus,
+.ini-select:focus {
+  outline: none;
+  border-color: var(--border-focus, var(--accent-primary));
+}
+
+.browse-btn {
+  padding: 6px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--motion-fast) ease;
+}
+
+.browse-btn:hover {
+  background: var(--bg-hover);
+}
+
+.error-msg {
+  padding: var(--space-2) var(--space-3);
+  background: var(--state-error-bg);
+  border: 1px solid var(--state-error-border);
+  border-radius: var(--radius-sm);
+  color: var(--state-error);
+  font-size: var(--font-size-sm);
+}
+
+.loading-msg {
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.msq-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.preview-label {
+  color: var(--text-secondary);
+}
+
+.preview-value {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.no-ini-match {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-2);
+  background: rgba(240, 173, 78, 0.08);
+  border: 1px solid rgba(240, 173, 78, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+.no-ini-match p {
+  margin: 0;
+  color: var(--state-warning);
+  font-size: var(--font-size-sm);
+}
+
+.import-ini-btn {
+  align-self: flex-start;
+  padding: 4px 12px;
+  background: var(--accent-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--accent-text);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background var(--motion-fast) ease;
+}
+
+.import-ini-btn:hover {
+  background: var(--accent-hover);
+}

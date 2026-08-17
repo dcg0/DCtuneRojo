@@ -1,0 +1,82 @@
+//! # LibreTune Core Library
+//!
+//! Core functionality for the LibreTune ECU tuning software.
+
+#![warn(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+//!
+//! This library provides:
+//! - INI definition file parsing (standard ECU INI format)
+//! - Serial protocol communication with ECUs
+//! - ECU memory model and value management
+//! - Data logging and playback
+//! - Tune file management
+//!
+//! ## Supported ECUs
+//!
+//! - Speeduino
+//! - epicEFI
+//! - Other INI-compatible ECUs
+//!
+//! ## Example
+//!
+//! ```rust,ignore
+//! use libretune_core::{ini::EcuDefinition, protocol::Connection};
+//!
+//! // Load ECU definition from INI file
+//! let definition = EcuDefinition::from_file("speeduino.ini")?;
+//!
+//! // Connect to ECU
+//! let mut conn = Connection::open("/dev/ttyUSB0", 115200)?;
+//! conn.handshake(&definition)?;
+//!
+//! // Read real-time data
+//! let data = conn.get_realtime_data()?;
+//! println!("RPM: {}", data.get("rpm")?);
+//! ```
+
+// Allow missing docs on internal/test modules
+#![allow(missing_docs)]
+
+pub mod action_scripting;
+pub mod agent;
+pub mod autotune;
+pub mod basemap;
+pub mod dash;
+pub mod datalog;
+pub mod demo;
+pub mod dynamic_table;
+pub mod ecu;
+pub mod ini;
+pub mod llm;
+pub mod lua;
+pub mod pin_conflict;
+pub mod plugin_api;
+pub mod plugin_system;
+pub mod port_editor;
+pub mod project;
+pub mod protocol;
+pub mod realtime;
+pub mod table_ops;
+pub mod tune;
+pub mod tune_view;
+pub mod unit_conversion;
+
+/// Re-export commonly used types
+pub mod prelude {
+    pub use crate::autotune::{
+        AutoTuneAuthorityLimits, AutoTuneFilters, AutoTuneRecommendation, AutoTuneSettings,
+        AutoTuneState,
+    };
+    pub use crate::dash::{DashFile, GaugeConfig, GaugePainter, IndicatorConfig};
+    pub use crate::datalog::{DataLogger, LogEntry};
+    pub use crate::ecu::{EcuMemory, Value};
+    pub use crate::ini::{Constant, EcuDefinition, OutputChannel, TableDefinition};
+    pub use crate::project::{IniEntry, IniRepository, Project, ProjectConfig};
+    pub use crate::protocol::{Connection, ConnectionState};
+    pub use crate::tune::{PageState, TuneCache, TuneFile};
+}
+
+/// Library version
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -1,0 +1,246 @@
+/* PerformanceFieldsDialog — only the bits the shared Dialog/Button primitives don't cover. */
+
+/* Make sure dialog body fits a 3-column layout when XL. */
+.performance-dialog .lt-dialog__body.performance-dialog-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.performance-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.performance-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.form-row {
+  margin-bottom: var(--space-3);
+}
+
+.form-row label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.form-row label input[type='checkbox'] {
+  margin-right: var(--space-2);
+}
+
+.form-row input[type='number'],
+.form-row input[type='text'],
+.form-row select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--motion-fast) ease;
+  box-sizing: border-box;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.input-with-unit {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.input-with-unit input {
+  flex: 1;
+}
+
+.input-with-unit select {
+  width: 70px;
+}
+
+.form-hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.button-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.button-row > * {
+  flex: 1;
+}
+
+/* Realtime values display */
+.realtime-values {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.realtime-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.realtime-value .label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.realtime-value .value {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* Fuel info */
+.fuel-info {
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-default);
+}
+
+.fuel-info .info-note {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Results section */
+.performance-section.results {
+  background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface));
+}
+
+.result-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--border-subtle);
+}
+
+.result-card.primary {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+  border: none;
+}
+
+.result-card.primary .result-label,
+.result-card.primary .result-value {
+  color: var(--accent-text);
+}
+
+.result-card .result-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-1);
+}
+
+.result-card .result-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.result-card .result-value small {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.result-card .result-alt {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.result-divider {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin: var(--space-3) 0 var(--space-2);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.result-row:last-of-type {
+  border-bottom: none;
+}
+
+.result-row .result-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.result-row .result-value {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.result-row .result-value small {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.result-note {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .performance-dialog .lt-dialog__body.performance-dialog-content {
+    grid-template-columns: 1fr;
+  }
+}

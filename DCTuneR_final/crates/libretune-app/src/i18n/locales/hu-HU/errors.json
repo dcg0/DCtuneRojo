@@ -1,0 +1,9 @@
+{
+  "generic": "Upsz, Valami nem stimmel.",
+  "loadFailed": "Sikertelen betöltés: {{detail}}",
+  "saveFailed": "Sikertelen mentés: {{detail}}",
+  "connectFailed": "Sikertelen kapcsolódás az ECU-hoz: {{detail}}",
+  "timeout": "Időtullépés",
+  "notConnected": "ECU nincs kapcsolódva",
+  "noProject": "Nincs projekt megnyitva"
+}

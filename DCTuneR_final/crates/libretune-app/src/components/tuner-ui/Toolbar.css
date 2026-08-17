@@ -1,0 +1,102 @@
+/*
+ * Toolbar - Icon toolbar below menu bar
+ */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: var(--toolbar-height);
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 var(--space-2);
+  gap: var(--space-1);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: var(--space-2);
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.toolbar-button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.toolbar-button:active:not(:disabled) {
+  background: var(--bg-active);
+}
+
+.toolbar-button-active {
+  background: var(--bg-active);
+  color: var(--primary);
+}
+
+.toolbar-button-burn-pending:not(:disabled) {
+  color: var(--error);
+}
+
+.toolbar-button-burn-pending:not(:disabled):hover {
+  background: rgba(255, 80, 80, 0.15);
+  color: var(--error);
+}
+
+.toolbar-button:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.toolbar-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Recording indicator - red pulsing circle */
+.toolbar-button .icon-recording {
+  color: var(--error);
+  fill: var(--error);
+  animation: pulse-recording 1s ease-in-out infinite;
+}
+
+@keyframes pulse-recording {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border-default);
+  margin: 0 var(--space-2);
+}
+
+/* Inline content container (for connection metrics + packet mode) */
+.toolbar-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.toolbar-connection-info .packet-mode {
+  margin-left: 0.4rem;
+  color: var(--text-bright);
+  font-weight: 600;
+}
+
+.toolbar-content .conn-metrics {
+  margin: 0;
+}

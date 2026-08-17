@@ -1,0 +1,143 @@
+/* CellEditDialog
+ *
+ * Layout for content inside the shared <Dialog>. Overlay/dialog/header/footer
+ * styling is provided by Dialog.css; this file only styles content-specific
+ * pieces (info grid, adjust buttons, value input, error/range hints).
+ */
+
+.cell-location {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  padding: 2px 8px;
+  border-radius: var(--radius-md);
+}
+
+.cell-edit-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  background: var(--bg-app);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-link);
+}
+
+.cell-edit-input-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.input-with-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.adjust-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.adjust-btn:hover {
+  background: var(--bg-active);
+  color: var(--text-primary);
+}
+
+.adjust-btn:active {
+  transform: scale(0.95);
+}
+
+.cell-value-input {
+  width: 120px;
+  height: 48px;
+  padding: 0 var(--space-6);
+  border: 2px solid var(--border-focus);
+  border-radius: var(--radius-md);
+  background: var(--bg-input, var(--bg-app));
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cell-value-input:focus {
+  outline: none;
+  border-color: var(--text-link);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.cell-value-input.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px var(--error-glow);
+}
+
+.cell-value-input::-webkit-inner-spin-button,
+.cell-value-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cell-value-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.units-label {
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+}
+
+.cell-edit-error {
+  color: var(--error);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--error-bg, var(--bg-hover));
+  border-radius: var(--radius-md);
+  border: 1px solid var(--error);
+}
+
+.cell-edit-range {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}

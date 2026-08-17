@@ -1,0 +1,43 @@
+/* Shared EmptyState primitive */
+
+.lt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-5);
+  color: var(--text-secondary);
+}
+
+.lt-empty--sm { padding: var(--space-6); }
+.lt-empty--md { padding: var(--space-8); }
+.lt-empty--lg { padding: calc(var(--space-8) * 2); }
+
+.lt-empty__icon {
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lt-empty__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.lt-empty__desc {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+.lt-empty__actions {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}

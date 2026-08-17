@@ -1,0 +1,122 @@
+/* Shared Button primitive — theme-token driven */
+
+.lt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  line-height: 1.2;
+}
+
+.lt-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.lt-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+.lt-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.lt-btn--block {
+  width: 100%;
+}
+
+.lt-btn__label {
+  display: inline-block;
+}
+
+.lt-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+/* ----- Sizes ----- */
+.lt-btn--sm {
+  padding: 4px 10px;
+  font-size: var(--font-size-sm);
+}
+.lt-btn--md {
+  padding: 6px 14px;
+  font-size: var(--font-size-base);
+}
+.lt-btn--lg {
+  padding: 9px 18px;
+  font-size: var(--font-size-md);
+}
+
+/* ----- Variants ----- */
+.lt-btn--primary {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+.lt-btn--primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+.lt-btn--primary:active:not(:disabled) {
+  background: var(--primary-active);
+  border-color: var(--primary-active);
+}
+
+.lt-btn--secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.lt-btn--secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+.lt-btn--secondary:active:not(:disabled) {
+  background: var(--bg-active);
+}
+
+.lt-btn--danger {
+  background: var(--error);
+  color: var(--text-inverse);
+  border-color: var(--error);
+}
+.lt-btn--danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.lt-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: transparent;
+}
+.lt-btn--ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.lt-btn--link {
+  background: transparent;
+  color: var(--text-link);
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+.lt-btn--link:hover:not(:disabled) {
+  text-decoration: underline;
+}

@@ -1,0 +1,9 @@
+{
+  "generic": "Something went wrong",
+  "loadFailed": "Failed to load: {{detail}}",
+  "saveFailed": "Failed to save: {{detail}}",
+  "connectFailed": "Failed to connect to ECU: {{detail}}",
+  "timeout": "Operation timed out",
+  "notConnected": "ECU is not connected",
+  "noProject": "No project is open"
+}

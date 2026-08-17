@@ -1,0 +1,213 @@
+/* MigrationReportDialog — content/section styles. Outer chrome handled by Dialog. */
+
+.migration-content {
+  min-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.migration-loading,
+.migration-empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.migration-empty .empty-icon {
+  opacity: 0.4;
+  margin-bottom: var(--space-2);
+}
+
+.migration-empty p {
+  margin: 0 0 var(--space-2) 0;
+}
+
+.migration-empty .hint {
+  font-size: var(--font-size-xs);
+  font-style: italic;
+}
+
+/* Severity-tinted summary */
+.migration-summary {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+
+.migration-summary.severity-high {
+  background: var(--state-error-bg);
+  border-color: var(--state-error-border);
+}
+
+.migration-summary.severity-medium {
+  background: rgba(240, 173, 78, 0.1);
+  border-color: rgba(240, 173, 78, 0.3);
+}
+
+.migration-summary.severity-low {
+  background: rgba(74, 158, 255, 0.08);
+  border-color: rgba(74, 158, 255, 0.25);
+}
+
+.severity-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.migration-summary.severity-high .severity-badge {
+  color: var(--state-error);
+}
+
+.migration-summary.severity-medium .severity-badge {
+  color: var(--state-warning);
+}
+
+.migration-summary p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+/* Sections */
+.migration-section {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.migration-section.critical {
+  border-color: var(--state-error-border);
+}
+
+.migration-section.warning {
+  border-color: rgba(240, 173, 78, 0.3);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--motion-fast) ease;
+}
+
+.section-header:hover {
+  background: var(--bg-hover);
+}
+
+.section-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.section-title {
+  flex: 1;
+  font-weight: 500;
+}
+
+.section-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.section-badge.critical {
+  background: var(--state-error-bg);
+  color: var(--state-error);
+}
+
+.section-badge.warning {
+  background: rgba(240, 173, 78, 0.15);
+  color: var(--state-warning);
+}
+
+.section-badge.info {
+  background: rgba(74, 158, 255, 0.15);
+  color: var(--accent-primary);
+}
+
+.change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border-subtle);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.change-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 6px var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+}
+
+.change-list li:last-child {
+  border-bottom: none;
+}
+
+.change-list code {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.change-detail {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.change-list.compact li {
+  padding: 4px var(--space-3);
+}
+
+.more-items {
+  justify-content: center !important;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+}
+
+/* Footer */
+.migration-footer {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.review-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--state-warning);
+  font-size: var(--font-size-xs);
+}
+
+.footer-buttons {
+  display: flex;
+  gap: var(--space-2);
+}

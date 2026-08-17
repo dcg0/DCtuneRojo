@@ -1,0 +1,390 @@
+/**
+ * Heatmap Color System
+ *
+ * Centralized, theme-aware heatmap coloring with multiple presets
+ * and accessibility options.
+ */
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/** Available heatmap color scheme presets */
+export type HeatmapScheme =
+  | 'tunerstudio'  // Classic: Blue → Cyan → Green → Yellow → Orange → Red
+  | 'pastel'       // Soft: Green → Yellow → Orange → Red, low saturation
+  | 'thermal'      // Black → Purple → Red → Orange → Yellow → White
+  | 'viridis'      // Colorblind-safe: Purple → Blue → Teal → Green → Yellow
+  | 'plasma'       // Colorblind-safe: Purple → Pink → Orange → Yellow
+  | 'grayscale'    // Universal: Black → White
+  | 'custom';      // User-defined colors
+
+/** Context for heatmap coloring - different contexts can use different schemes */
+export type HeatmapContext =
+  | 'value'     // VE tables, timing tables, general value display
+  | 'change'    // AFR correction magnitude, value deltas
+  | 'coverage'; // Hit weighting, data coverage visualization
+
+/** RGB color representation */
+export interface RGBColor {
+  r: number;
+  g: number;
+  b: number;
+}
+
+/** Heatmap scheme definition with color stops */
+export interface HeatmapSchemeDefinition {
+  name: string;
+  description: string;
+  colorblindSafe: boolean;
+  stops: string[]; // Hex colors from low to high
+}
+
+// ============================================================================
+// Preset Schemes
+// ============================================================================
+
+export const HEATMAP_SCHEMES: Record<Exclude<HeatmapScheme, 'custom'>, HeatmapSchemeDefinition> = {
+  tunerstudio: {
+    name: 'TunerStudio Classic',
+    description: 'Traditional ECU tuning gradient',
+    colorblindSafe: false,
+    stops: [
+      '#0000FF', // Blue (cold/low)
+      '#00FFFF', // Cyan
+      '#00FF00', // Green
+      '#FFFF00', // Yellow
+      '#FF8000', // Orange
+      '#FF0000', // Red (hot/high)
+    ],
+  },
+  pastel: {
+    name: 'Pastel',
+    description: 'Soft green-to-red gradient, easy on the eyes',
+    colorblindSafe: false,
+    stops: [
+      '#66c96d', // soft green (low)
+      '#a9d94f',
+      '#e8e14b', // soft yellow
+      '#f0a944', // soft orange
+      '#e96c6c', // soft red (high)
+    ],
+  },
+  thermal: {
+    name: 'Thermal',
+    description: 'Infrared camera style gradient',
+    colorblindSafe: false,
+    stops: [
+      '#000000', // Black (cold)
+      '#4B0082', // Indigo
+      '#FF0000', // Red
+      '#FF8000', // Orange
+      '#FFFF00', // Yellow
+      '#FFFFFF', // White (hot)
+    ],
+  },
+  viridis: {
+    name: 'Viridis',
+    description: 'Perceptually uniform, colorblind-safe',
+    colorblindSafe: true,
+    stops: [
+      '#440154', // Dark purple
+      '#414487', // Purple-blue
+      '#2A788E', // Teal
+      '#22A884', // Green
+      '#7AD151', // Light green
+      '#FDE725', // Yellow
+    ],
+  },
+  plasma: {
+    name: 'Plasma',
+    description: 'High contrast, colorblind-safe',
+    colorblindSafe: true,
+    stops: [
+      '#0D0887', // Deep blue-purple
+      '#7E03A8', // Purple
+      '#CC4778', // Pink
+      '#F89540', // Orange
+      '#F0F921', // Bright yellow
+      '#F0F921', // (repeat for 6 stops)
+    ],
+  },
+  grayscale: {
+    name: 'Grayscale',
+    description: 'Universal accessibility, print-friendly',
+    colorblindSafe: true,
+    stops: [
+      '#000000', // Black
+      '#333333', // Dark gray
+      '#666666', // Gray
+      '#999999', // Light gray
+      '#CCCCCC', // Lighter gray
+      '#FFFFFF', // White
+    ],
+  },
+};
+
+// ============================================================================
+// Color Utilities
+// ============================================================================
+
+/**
+ * Parse a hex color string to RGB components
+ */
+export function hexToRgb(hex: string): RGBColor {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) {
+    return { r: 128, g: 128, b: 128 }; // Default gray
+  }
+  return {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  };
+}
+
+/**
+ * Convert RGB to hex string
+ */
+export function rgbToHex(rgb: RGBColor): string {
+  const toHex = (n: number) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, '0');
+  return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+}
+
+/**
+ * Convert RGB to CSS rgb() string
+ */
+export function rgbToCss(rgb: RGBColor): string {
+  return `rgb(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)})`;
+}
+
+/** Parse rgb() or hex CSS color strings into RGB components. */
+export function parseCssColor(color: string): RGBColor {
+  const trimmed = color.trim();
+  const rgbMatch = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i.exec(trimmed);
+  if (rgbMatch) {
+    return {
+      r: parseInt(rgbMatch[1], 10),
+      g: parseInt(rgbMatch[2], 10),
+      b: parseInt(rgbMatch[3], 10),
+    };
+  }
+  if (trimmed.startsWith('#')) {
+    return hexToRgb(trimmed);
+  }
+  return { r: 128, g: 128, b: 128 };
+}
+
+/** WCAG relative luminance for sRGB colors. */
+export function relativeLuminance(rgb: RGBColor): number {
+  const channel = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(rgb.r) + 0.7152 * channel(rgb.g) + 0.0722 * channel(rgb.b);
+}
+
+/** Pick a readable foreground color for heatmap cell backgrounds. */
+export function textColorForBackground(background: string): string {
+  return relativeLuminance(parseCssColor(background)) > 0.179 ? '#111111' : '#ffffff';
+}
+
+/**
+ * Interpolate between two colors
+ * @param color1 - Start color (hex)
+ * @param color2 - End color (hex)
+ * @param ratio - Interpolation ratio (0 = color1, 1 = color2)
+ */
+export function interpolateColor(color1: string, color2: string, ratio: number): RGBColor {
+  const rgb1 = hexToRgb(color1);
+  const rgb2 = hexToRgb(color2);
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+
+  return {
+    r: rgb1.r + (rgb2.r - rgb1.r) * clampedRatio,
+    g: rgb1.g + (rgb2.g - rgb1.g) * clampedRatio,
+    b: rgb1.b + (rgb2.b - rgb1.b) * clampedRatio,
+  };
+}
+
+/**
+ * Get color from a multi-stop gradient at a given position
+ * @param stops - Array of hex color stops
+ * @param position - Position in gradient (0-1)
+ */
+export function getGradientColor(stops: string[], position: number): RGBColor {
+  const clampedPos = Math.max(0, Math.min(1, position));
+
+  if (stops.length === 0) {
+    return { r: 128, g: 128, b: 128 };
+  }
+  if (stops.length === 1) {
+    return hexToRgb(stops[0]);
+  }
+
+  // Map position to segment
+  const segmentCount = stops.length - 1;
+  const scaledPos = clampedPos * segmentCount;
+  const segmentIndex = Math.min(Math.floor(scaledPos), segmentCount - 1);
+  const segmentRatio = scaledPos - segmentIndex;
+
+  return interpolateColor(stops[segmentIndex], stops[segmentIndex + 1], segmentRatio);
+}
+
+// ============================================================================
+// Main Heatmap Functions
+// ============================================================================
+
+/**
+ * Convert a value to a heatmap color
+ *
+ * @param value - The value to colorize
+ * @param min - Minimum value in range
+ * @param max - Maximum value in range
+ * @param scheme - Color scheme to use (or custom stops array)
+ * @returns CSS color string
+ */
+/** Black or white text depending on background luminance. Accepts #rrggbb or
+ *  rgb(...) strings; returns undefined for anything else (CSS default wins). */
+export function contrastTextColor(background: string): string | undefined {
+  let r: number, g: number, b: number;
+  const hex = /^#([0-9a-f]{6})$/i.exec(background.trim());
+  const rgb = /^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(background.trim());
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    r = (n >> 16) & 255;
+    g = (n >> 8) & 255;
+    b = n & 255;
+  } else if (rgb) {
+    r = +rgb[1];
+    g = +rgb[2];
+    b = +rgb[3];
+  } else {
+    return undefined;
+  }
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.55 ? '#111418' : '#ffffff';
+}
+
+export function valueToHeatmapColor(
+  value: number,
+  min: number,
+  max: number,
+  scheme: HeatmapScheme | string[] = 'tunerstudio'
+): string {
+  // Handle edge cases
+  const range = max - min;
+  if (range === 0) {
+    // All values are the same - return middle color
+    const stops = getSchemeStops(scheme);
+    return rgbToCss(hexToRgb(stops[Math.floor(stops.length / 2)]));
+  }
+
+  // Normalize value to 0-1 range
+  const normalized = Math.max(0, Math.min(1, (value - min) / range));
+
+  // Get color from gradient
+  const stops = getSchemeStops(scheme);
+  const rgb = getGradientColor(stops, normalized);
+
+  return rgbToCss(rgb);
+}
+
+/**
+ * Get CSS gradient string for a scheme (for legends, previews)
+ */
+export function getHeatmapGradientCSS(
+  scheme: HeatmapScheme | string[] = 'tunerstudio',
+  direction: 'to right' | 'to left' | 'to top' | 'to bottom' = 'to right'
+): string {
+  const stops = getSchemeStops(scheme);
+  return `linear-gradient(${direction}, ${stops.join(', ')})`;
+}
+
+/**
+ * Get the color stops for a scheme
+ */
+export function getSchemeStops(scheme: HeatmapScheme | string[]): string[] {
+  if (Array.isArray(scheme)) {
+    return scheme;
+  }
+  if (scheme === 'custom') {
+    // Custom scheme - return tunerstudio as fallback
+    return HEATMAP_SCHEMES.tunerstudio.stops;
+  }
+  return HEATMAP_SCHEMES[scheme]?.stops ?? HEATMAP_SCHEMES.tunerstudio.stops;
+}
+
+/**
+ * Get scheme definition by name
+ */
+export function getSchemeDefinition(scheme: HeatmapScheme): HeatmapSchemeDefinition | null {
+  if (scheme === 'custom') return null;
+  return HEATMAP_SCHEMES[scheme] ?? null;
+}
+
+/**
+ * Get all available scheme names
+ */
+export function getAvailableSchemes(): Array<{ id: HeatmapScheme; name: string; colorblindSafe: boolean }> {
+  return [
+    { id: 'tunerstudio', name: 'TunerStudio Classic', colorblindSafe: false },
+    { id: 'pastel', name: 'Pastel', colorblindSafe: false },
+    { id: 'thermal', name: 'Thermal', colorblindSafe: false },
+    { id: 'viridis', name: 'Viridis', colorblindSafe: true },
+    { id: 'plasma', name: 'Plasma', colorblindSafe: true },
+    { id: 'grayscale', name: 'Grayscale', colorblindSafe: true },
+    { id: 'custom', name: 'Custom', colorblindSafe: false },
+  ];
+}
+
+// ============================================================================
+// Context-Aware Heatmap Hook Support
+// ============================================================================
+
+/** Default schemes for each context */
+export const DEFAULT_CONTEXT_SCHEMES: Record<HeatmapContext, HeatmapScheme> = {
+  value: 'tunerstudio',
+  change: 'tunerstudio',
+  coverage: 'tunerstudio',
+};
+
+/** Settings structure for heatmap configuration */
+export interface HeatmapSettings {
+  valueScheme: HeatmapScheme;
+  changeScheme: HeatmapScheme;
+  coverageScheme: HeatmapScheme;
+  customValueStops?: string[];
+  customChangeStops?: string[];
+  customCoverageStops?: string[];
+}
+
+/**
+ * Create a color getter function for a specific context
+ */
+export function createContextColorGetter(
+  settings: HeatmapSettings,
+  context: HeatmapContext
+): (value: number, min: number, max: number) => string {
+  let scheme: HeatmapScheme | string[];
+
+  switch (context) {
+    case 'value':
+      scheme = settings.valueScheme === 'custom' && settings.customValueStops
+        ? settings.customValueStops
+        : settings.valueScheme;
+      break;
+    case 'change':
+      scheme = settings.changeScheme === 'custom' && settings.customChangeStops
+        ? settings.customChangeStops
+        : settings.changeScheme;
+      break;
+    case 'coverage':
+      scheme = settings.coverageScheme === 'custom' && settings.customCoverageStops
+        ? settings.customCoverageStops
+        : settings.coverageScheme;
+      break;
+  }
+
+  return (value: number, min: number, max: number) => valueToHeatmapColor(value, min, max, scheme);
+}

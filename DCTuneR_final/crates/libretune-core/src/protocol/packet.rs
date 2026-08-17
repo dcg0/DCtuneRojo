@@ -1,0 +1,342 @@
+//! Packet encoding/decoding
+//!
+//! Implements the binary packet format with CRC32 for the modern protocol.
+//!
+//! Packet format (rusEFI/msEnvelope_1.0):
+//! - 2 bytes: Payload length (big-endian)
+//! - N bytes: Payload
+//! - 4 bytes: CRC32 (of payload only, NOT length+payload)
+
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
+use crc32fast::Hasher;
+
+use super::{ProtocolError, MAX_PACKET_SIZE};
+
+/// A protocol packet
+#[derive(Debug, Clone)]
+pub struct Packet {
+    /// Packet payload
+    pub payload: Vec<u8>,
+    /// CRC32 of the payload only
+    pub crc: u32,
+}
+
+impl Packet {
+    /// Create a new packet with the given payload
+    pub fn new(payload: Vec<u8>) -> Self {
+        let crc = calculate_crc(&payload);
+        Self { payload, crc }
+    }
+
+    /// Decode a packet from raw bytes using the strict spec scope.
+    ///
+    /// Per msEnvelope_1.0 §15.1, the on-the-wire frame is:
+    ///   `size(2 BE) || rc(1) || payload(size-1) || CRC32(4 BE)`
+    /// where the CRC covers `rc || payload` (scope A) and is encoded big-endian.
+    pub fn from_bytes(data: &[u8]) -> Result<Self, ProtocolError> {
+        Self::from_bytes_with_mode(data, false)
+    }
+
+    /// Decode a packet, optionally accepting non-spec CRC scopes/byte-orders.
+    ///
+    /// When `permissive` is true, the decoder will also accept seven additional
+    /// CRC scope/endianness combinations observed on quirky firmware variants:
+    /// scope B (data-only, no rc byte), scope C (length+payload), scope D
+    /// (length+data), each in both big- and little-endian. A one-time warning
+    /// is logged when permissive matching succeeds with a non-strict scope.
+    pub fn from_bytes_with_mode(data: &[u8], permissive: bool) -> Result<Self, ProtocolError> {
+        if data.len() < 6 {
+            return Err(ProtocolError::InvalidResponse);
+        }
+
+        let length = BigEndian::read_u16(&data[0..2]) as usize;
+        if length > MAX_PACKET_SIZE {
+            return Err(ProtocolError::BufferOverflow);
+        }
+        if data.len() < 2 + length + 4 {
+            return Err(ProtocolError::InvalidResponse);
+        }
+
+        let payload = data[2..2 + length].to_vec();
+        let crc_bytes = &data[2 + length..2 + length + 4];
+        let received_crc_be = BigEndian::read_u32(crc_bytes);
+
+        // Strict spec: scope A (full payload) big-endian.
+        let crc_a = {
+            let mut h = Hasher::new();
+            h.update(&payload);
+            h.finalize()
+        };
+        if received_crc_be == crc_a {
+            return Ok(Self {
+                payload,
+                crc: received_crc_be,
+            });
+        }
+
+        if !permissive {
+            return Err(ProtocolError::CrcMismatch {
+                expected: crc_a,
+                actual: received_crc_be,
+            });
+        }
+
+        // Permissive fallback: try seven additional scope/endianness combos.
+        let length_bytes = &data[0..2];
+        let crc_b = if payload.len() > 1 {
+            let mut h = Hasher::new();
+            h.update(&payload[1..]);
+            h.finalize()
+        } else {
+            0
+        };
+        let crc_c = {
+            let mut h = Hasher::new();
+            h.update(length_bytes);
+            h.update(&payload);
+            h.finalize()
+        };
+        let crc_d = if payload.len() > 1 {
+            let mut h = Hasher::new();
+            h.update(length_bytes);
+            h.update(&payload[1..]);
+            h.finalize()
+        } else {
+            0
+        };
+        let received_crc_le = LittleEndian::read_u32(crc_bytes);
+
+        let match_a_le = received_crc_le == crc_a;
+        let match_b_be = received_crc_be == crc_b;
+        let match_b_le = received_crc_le == crc_b;
+        let match_c_be = received_crc_be == crc_c;
+        let match_c_le = received_crc_le == crc_c;
+        let match_d_be = received_crc_be == crc_d;
+        let match_d_le = received_crc_le == crc_d;
+
+        let matched = match_a_le
+            || match_b_be
+            || match_b_le
+            || match_c_be
+            || match_c_le
+            || match_d_be
+            || match_d_le;
+
+        if !matched {
+            let raw_preview: Vec<String> =
+                data.iter().take(12).map(|b| format!("{:02x}", b)).collect();
+            eprintln!(
+                "[CRC MISMATCH] raw_first12=[{}] recv_be={:08x} \
+                 crc_A(full/BE)={:08x} crc_B(data/BE)={:08x} \
+                 crc_C(len+full/BE)={:08x} crc_D(len+data/BE)={:08x}",
+                raw_preview.join(" "),
+                received_crc_be,
+                crc_a,
+                crc_b,
+                crc_c,
+                crc_d
+            );
+            return Err(ProtocolError::CrcMismatch {
+                expected: crc_a,
+                actual: received_crc_be,
+            });
+        }
+
+        // Log non-strict scope match exactly once.
+        static LOGGED_PERMISSIVE: std::sync::atomic::AtomicBool =
+            std::sync::atomic::AtomicBool::new(false);
+        if !LOGGED_PERMISSIVE.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            let scope = if match_a_le {
+                "A: full payload (LE)"
+            } else if match_b_be || match_b_le {
+                "B: data-only (no status byte)"
+            } else if match_c_be || match_c_le {
+                "C: length+payload"
+            } else {
+                "D: length+data"
+            };
+            eprintln!(
+                "[CRC] WARNING: non-spec CRC scope accepted (permissive mode). scope={}",
+                scope
+            );
+        }
+
+        let received_crc = if match_b_be || match_c_be || match_d_be {
+            received_crc_be
+        } else {
+            received_crc_le
+        };
+
+        Ok(Self {
+            payload,
+            crc: received_crc,
+        })
+    }
+
+    /// Encode the packet to raw bytes
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(2 + self.payload.len() + 4);
+
+        // Length (2 bytes, big-endian)
+        let mut len_bytes = [0u8; 2];
+        BigEndian::write_u16(&mut len_bytes, self.payload.len() as u16);
+        bytes.extend_from_slice(&len_bytes);
+
+        // Payload
+        bytes.extend_from_slice(&self.payload);
+
+        // Calculate CRC of payload only (rusEFI format)
+        let mut hasher = Hasher::new();
+        hasher.update(&self.payload);
+        let crc = hasher.finalize();
+
+        // CRC (4 bytes, big-endian)
+        let mut crc_bytes = [0u8; 4];
+        BigEndian::write_u32(&mut crc_bytes, crc);
+        bytes.extend_from_slice(&crc_bytes);
+
+        bytes
+    }
+
+    /// Get the total encoded size
+    pub fn encoded_size(&self) -> usize {
+        2 + self.payload.len() + 4
+    }
+}
+
+/// Builder for constructing packets
+pub struct PacketBuilder {
+    payload: Vec<u8>,
+}
+
+impl PacketBuilder {
+    /// Create a new packet builder
+    pub fn new() -> Self {
+        Self {
+            payload: Vec::new(),
+        }
+    }
+
+    /// Add a command byte
+    pub fn command(mut self, cmd: u8) -> Self {
+        self.payload.push(cmd);
+        self
+    }
+
+    /// Add a single byte
+    pub fn byte(mut self, b: u8) -> Self {
+        self.payload.push(b);
+        self
+    }
+
+    /// Add a 16-bit value (big-endian)
+    pub fn u16_be(mut self, value: u16) -> Self {
+        let mut bytes = [0u8; 2];
+        BigEndian::write_u16(&mut bytes, value);
+        self.payload.extend_from_slice(&bytes);
+        self
+    }
+
+    /// Add a 32-bit value (big-endian)
+    pub fn u32_be(mut self, value: u32) -> Self {
+        let mut bytes = [0u8; 4];
+        BigEndian::write_u32(&mut bytes, value);
+        self.payload.extend_from_slice(&bytes);
+        self
+    }
+
+    /// Add raw bytes
+    pub fn bytes(mut self, data: &[u8]) -> Self {
+        self.payload.extend_from_slice(data);
+        self
+    }
+
+    /// Build the packet
+    pub fn build(self) -> Packet {
+        Packet::new(self.payload)
+    }
+}
+
+impl Default for PacketBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Calculate CRC32 of the payload (for simple payloads without length prefix)
+fn calculate_crc(payload: &[u8]) -> u32 {
+    let mut hasher = Hasher::new();
+
+    // Calculate length prefix
+    let mut len_bytes = [0u8; 2];
+    BigEndian::write_u16(&mut len_bytes, payload.len() as u16);
+
+    hasher.update(&len_bytes);
+    hasher.update(payload);
+    hasher.finalize()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_packet_roundtrip() {
+        let original = Packet::new(vec![0x51]); // 'Q' command
+        let encoded = original.to_bytes();
+        let decoded = Packet::from_bytes(&encoded).expect("Should decode successfully");
+
+        assert_eq!(original.payload, decoded.payload);
+    }
+
+    #[test]
+    fn test_packet_builder() {
+        let packet = PacketBuilder::new()
+            .command(b'R')
+            .byte(0) // Table
+            .byte(0) // CAN ID
+            .u16_be(0) // Offset
+            .u16_be(128) // Length
+            .build();
+
+        assert_eq!(packet.payload[0], b'R');
+        assert_eq!(packet.payload.len(), 7);
+    }
+
+    #[test]
+    fn test_crc_verification() {
+        let packet = Packet::new(vec![1, 2, 3, 4, 5]);
+        let mut encoded = packet.to_bytes();
+
+        // Corrupt a byte
+        encoded[3] ^= 0xFF;
+
+        // Should fail CRC check
+        assert!(Packet::from_bytes(&encoded).is_err());
+    }
+
+    #[test]
+    fn test_strict_mode_rejects_scope_c_frame() {
+        // Build a frame whose CRC covers length+payload (scope C) instead of payload-only (A).
+        let payload = vec![0x00, 0x42, 0x43];
+        let mut len_bytes = [0u8; 2];
+        BigEndian::write_u16(&mut len_bytes, payload.len() as u16);
+
+        let mut h = Hasher::new();
+        h.update(&len_bytes);
+        h.update(&payload);
+        let crc_c = h.finalize();
+
+        let mut frame = Vec::new();
+        frame.extend_from_slice(&len_bytes);
+        frame.extend_from_slice(&payload);
+        let mut crc_bytes = [0u8; 4];
+        BigEndian::write_u32(&mut crc_bytes, crc_c);
+        frame.extend_from_slice(&crc_bytes);
+
+        // Strict mode: must reject (spec scope is A).
+        assert!(Packet::from_bytes(&frame).is_err());
+        // Permissive mode: must accept.
+        assert!(Packet::from_bytes_with_mode(&frame, true).is_ok());
+    }
+}

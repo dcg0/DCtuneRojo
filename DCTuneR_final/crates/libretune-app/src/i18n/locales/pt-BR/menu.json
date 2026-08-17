@@ -1,0 +1,58 @@
+{
+  "file": {
+    "title": "&Arquivo",
+    "newProject": "&Novo Projeto…\tCtrl+N",
+    "importProject": "&Importar Projeto TS…",
+    "closeProject": "&Fechar Projeto",
+    "saveTune": "&Salvar Tune\tCtrl+S",
+    "saveTuneAs": "Salvar Tune &Como…",
+    "loadTune": "&Carregar Tune…",
+    "createRestorePoint": "Criar &Ponto de Restauração",
+    "restorePoints": "&Pontos de Restauração…",
+    "tuneHistory": "&Histórico do Tune…",
+    "burnToEcu": "&Gravar na ECU\tCtrl+B",
+    "exit": "&Sair",
+    "settings": "&Configurações…"
+  },
+  "edit": {
+    "title": "&Editar",
+    "undo": "&Desfazer\tCtrl+Z",
+    "redo": "&Refazer\tCtrl+Y",
+    "cut": "Recor&tar\tCtrl+X",
+    "copy": "&Copiar\tCtrl+C",
+    "paste": "C&olar\tCtrl+V",
+    "resetToDefaults": "Restaurar &Padrões"
+  },
+  "view": {
+    "title": "&Visualizar",
+    "dashboard": "&Painel",
+    "toggleSidebar": "Alternar &Barra Lateral",
+    "theme": "&Tema"
+  },
+  "tools": {
+    "title": "&Ferramentas",
+    "autotune": "&AutoTune",
+    "dataLogging": "&Registro de Dados",
+    "outputChannelStatus": "&Status dos Canais de Saída",
+    "toothLogger": "&Registro de Dentes",
+    "compositeLogger": "&Registro Composto",
+    "ecuConsole": "&Console da ECU",
+    "ecuLuaEditor": "Editor &Lua da ECU",
+    "updateFirmware": "Atualizar &Firmware da ECU…",
+    "enterDfuMode": "Entrar em Modo &DFU…",
+    "tableCompare": "&Comparar Tabelas",
+    "tuneFileDiff": "&Diferenças de Tune…",
+    "dynoData": "&Dados de Dinamômetro…",
+    "mathChannels": "Canais &Matemáticos…",
+    "generateBaseMap": "&Gerar Mapa Base…",
+    "plugins": "&Plugins…",
+    "aiAssistant": "&Assistente de IA",
+    "ecuConnection": "&Conexão com ECU…"
+  },
+  "help": {
+    "title": "Aj&uda",
+    "userManual": "&Manual do Usuário",
+    "keyboardShortcuts": "&Atalhos de Teclado",
+    "about": "&Sobre o LibreTune"
+  }
+}

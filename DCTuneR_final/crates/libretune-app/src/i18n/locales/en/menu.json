@@ -1,0 +1,58 @@
+{
+  "file": {
+    "title": "&File",
+    "newProject": "&New Project…\tCtrl+N",
+    "importProject": "&Import TS Project…",
+    "closeProject": "&Close Project",
+    "saveTune": "&Save Tune\tCtrl+S",
+    "saveTuneAs": "Save Tune &As…",
+    "loadTune": "&Load Tune…",
+    "createRestorePoint": "Create &Restore Point",
+    "restorePoints": "Restore &Points…",
+    "tuneHistory": "Tune &History…",
+    "burnToEcu": "&Burn to ECU\tCtrl+B",
+    "exit": "E&xit",
+    "settings": "&Settings…"
+  },
+  "edit": {
+    "title": "&Edit",
+    "undo": "&Undo\tCtrl+Z",
+    "redo": "&Redo\tCtrl+Y",
+    "cut": "Cu&t\tCtrl+X",
+    "copy": "&Copy\tCtrl+C",
+    "paste": "&Paste\tCtrl+V",
+    "resetToDefaults": "Reset to &Defaults"
+  },
+  "view": {
+    "title": "&View",
+    "dashboard": "&Dashboard",
+    "toggleSidebar": "Toggle &Sidebar",
+    "theme": "&Theme"
+  },
+  "tools": {
+    "title": "&Tools",
+    "autotune": "&AutoTune",
+    "dataLogging": "&Data Logging",
+    "outputChannelStatus": "&Output Channel Status",
+    "toothLogger": "&Tooth Logger",
+    "compositeLogger": "&Composite Logger",
+    "ecuConsole": "&ECU Console",
+    "ecuLuaEditor": "ECU &Lua Editor",
+    "updateFirmware": "Update ECU &Firmware…",
+    "enterDfuMode": "Enter &DFU Mode…",
+    "tableCompare": "Table &Compare",
+    "tuneFileDiff": "Tune File &Diff…",
+    "dynoData": "D&yno Data…",
+    "mathChannels": "&Math Channels…",
+    "generateBaseMap": "Generate &Base Map…",
+    "plugins": "&Plugins…",
+    "aiAssistant": "&AI Assistant",
+    "ecuConnection": "&ECU Connection…"
+  },
+  "help": {
+    "title": "&Help",
+    "userManual": "&User Manual",
+    "keyboardShortcuts": "&Keyboard Shortcuts",
+    "about": "&About LibreTune"
+  }
+}
