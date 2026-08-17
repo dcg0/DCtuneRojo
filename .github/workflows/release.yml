@@ -41,3 +41,10 @@ jobs:
       - name: Build Tauri app (Linux / macOS)
         if: matrix.platform != 'windows-latest'
         run: npx tauri build --ignore-version-mismatches
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build-${{ matrix.platform }}
+          path: |
+            DCTuneR_final/crates/libretune-app/src-tauri/target/release/bundle/
